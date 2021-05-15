@@ -4,6 +4,8 @@ from argparse import ArgumentParser
 from bigram import LanguageModel as BigramModel
 from trigram import LanguageModel as TrigramModel
 from unigram import LanguageModel as UnigramModel
+import re
+import math
 
 
 def main():
