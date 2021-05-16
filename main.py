@@ -60,12 +60,18 @@ def main():
 
     # train the language model
     print()
-    lm.train(args.train_corpus)
-
+    lm_counts = lm.train(args.train_corpus)
+    print(lm_counts)
+    print()
     # evaluates the language model
+    # prints out every sentence in test corpus with it's probability
+    # and the entire testset's perplexity
     if args.test_corpus:
         print()
-        lm.score(test_corpus=args.test_corpus)
+        score = lm.score(args.test_corpus, lm_counts)
+        for i in range(0, len(score)):
+            print("{}  {}".format(score[i][0],score[i][1]))
+
 
     print()
 
