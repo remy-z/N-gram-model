@@ -59,22 +59,25 @@ def main():
     lm = LanguageModel()
 
     # train the language model
+    # save probabilities to a dictionary
     print()
     lm_probs = lm.train(args.train_corpus)
-    print(lm_probs)
+    
+    #output the results
+    for key in lm_probs:
+        print("{} {}".format(key, lm_probs[key]))
+    
     print()
     
     # evaluates the language model
     # prints out every sentence in test corpus with it's probability
-    # and the entire testset's perplexity
+    # and perplexity of entire testset
     
     if args.test_corpus:
         print()
         score = lm.score(args.test_corpus, lm_probs)
         for i in range(0, len(score)):
             print("{}  {}".format(score[i][0],score[i][1]))
-
-
     print()
 
 

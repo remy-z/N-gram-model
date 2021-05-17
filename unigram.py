@@ -65,8 +65,12 @@ class LanguageModel:
             probability = math.log(((unigram_counts[key][0] + 1) / (total_tokens + vocab_size)), 2)
             probability = round(probability, 3)
             unigram_probs.update({key: probability})
-
-        return unigram_probs
+        
+        # Make a new sorted dictionary:
+        # Sorted first by probability (descending) then alphabetically for keys with the same value
+        unigram_probs_sorted = dict(sorted(unigram_probs.items(), key = lambda x: (-x[1], x[0])))
+        
+        return unigram_probs_sorted
 
     def score(self, test_corpus, unigram_probs):
         #these two lists will have corresponding indices
