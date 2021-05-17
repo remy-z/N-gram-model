@@ -3,6 +3,9 @@ import re
 import math
 import globalfunctions as gf
 
+#get our global functions
+gfuncs = gf.GlobalFunctions()
+
 # TODO: Implement a Laplace-smoothed unigram model :)
 class LanguageModel:
 
@@ -12,16 +15,19 @@ class LanguageModel:
     def train(self, train_corpus):
         
         #get our global functions
-        funcs = gf.GlobalFunctions()
+        #funcs = gf.GlobalFunctions()
        
         # opens train_corpus and returns it as a list (sentences) of lists (tokens)
-        # Unks the list
-        list_of_sentences = funcs.TrainUnker(funcs.TrainOpener(train_corpus))
+        list_of_sentences = gfuncs.Opener(train_corpus)
 
+        # Tokenize the list of sentences (split sentences into a list of their tokens)
+        tokenized_sentences = gfuncs.Tokenizer(list_of_sentences)
 
+        # UNK the tokenized sentences
+        unked_sentences = gfuncs.Unker(tokenized_sentences)
         
         # calculate counts with the UNKed set
-        unigram_counts = funcs.UniCounter(list_of_sentences)
+        unigram_counts = gfuncs.UniCounter(unked_sentences)
         
         # every key in the unigram_counts dictionary is one unique word, so our vocab size 
         # is equal to len(unigram_counts)-1 because we don't want to inlcude UNK
@@ -44,52 +50,50 @@ class LanguageModel:
         
         return unigram_probs_sorted
 
-    def score(self, test_corpus, unigram_probs):
-        #these two lists will have corresponding indices
-        list_of_test_sen = []    #splits every sentence into tokens to to iterate over
-        sentences_and_probs = [] #keeps track of each sentence and it's probability
-        
-        # open the test_corpus and turn sentences into a list of lists
-        # also add each sentence to a list of test senteces for printing 
-        with open(test_corpus, 'r', encoding = 'utf8') as f:
-            for line in f:
-                line = re.sub(r'\n',"" , line)
-                sentences_and_probs.append([line])
-                line = line.split()
-                list_of_test_sen.append(line)
-        
-        #UNK everything in the test set that doesn't appear in our vocabulary (isn't a key in unigram_counts)
-        for i in range(0, len(list_of_test_sen)):
-            for j in range(0, len(list_of_test_sen[i])):
-                if list_of_test_sen[i][j] not in unigram_probs:
-                    list_of_test_sen[i][j] = "<UNK>"
 
-       
-        #calculate the probability
-        #all of our probabilities are log probabilities, so we can just add everything       
+
+    def score(self, test_corpus, unigram_probs):
+              
         
-        # adds probabilites for each individual sentence,
-        # and keeps a running probability for calculating perplexity
+        # open test_corpus and save as a list of sentences 
+        test_sentences = gfuncs.Opener(test_corpus)
+        random_list = ["hello I am"]
+        #tokenize the sentences
+        tokenized_test = gfuncs.Tokenizer(test_sentences)
         
-        prob_cum_sum = 0  # this is the sum of probabilities for every sentence
-        word_count = 0    # this is our N for calculating perplexity
+        #UNK everything in the test set that doesn't appear in our vocabulary (isn't a key in unigram_probs)
+        unked_test_set = gfuncs.Unker(tokenized_test, unigram_probs)
+
+        """
+        Calculate the probability
+        all of our probabilities are log probabilities, so we can just 
+        add probabilites for each individual sentence,
+        and keep a running probability for calculating perplexity
+        """
+
+        prob_cum_sum = 0   # this is the sum of probabilities for every sentence
+        word_count = 0     # this is our N for calculating perplexity
+        list_of_probs = [] #keep track of our probabilites 
         
-        for i in range(0, len(list_of_test_sen)):
+        for i in range(0, len(unked_test_set)):
             #keeps track of probability for each sentence
             sen_prob = 0 
             
-            for j in range(0, len(list_of_test_sen[i])):
+            for j in range(0, len(unked_test_set[i])):
                 word_count += 1
-                sen_prob += unigram_probs[list_of_test_sen[i][j]]
-                prob_cum_sum += unigram_probs[list_of_test_sen[i][j]]
+                sen_prob += unigram_probs[unked_test_set[i][j]]
+                prob_cum_sum += unigram_probs[unked_test_set[i][j]]
             
-            sentences_and_probs[i].append(round(sen_prob,3))
+            list_of_probs.append(round(sen_prob,3))
         
+        # make a list of sentences and their corresponding probabilities to return 
+        sentences_and_probs = list(zip(test_sentences, list_of_probs))
+
         #calculate perplexity and add it as the list entry to the list we return
         h = (-1 / word_count) * (prob_cum_sum)
         perplexity = round(math.pow(2,h), 3)
         
         #add perplexity as the last index of the list we return
-        sentences_and_probs.append(["perplexity: ", perplexity])
+        sentences_and_probs.append(("perplexity: ", perplexity))
         
         return sentences_and_probs
