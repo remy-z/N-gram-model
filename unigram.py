@@ -1,6 +1,8 @@
 # !/usr/bin/python3
 import re
 import math
+import globalfunctions as gf
+
 # TODO: Implement a Laplace-smoothed unigram model :)
 class LanguageModel:
 
@@ -8,65 +10,35 @@ class LanguageModel:
         pass
 
     def train(self, train_corpus):
-        list_of_sentences = []
+        
+        #get our global functions
+        funcs = gf.GlobalFunctions()
+       
+        # opens train_corpus and returns it as a list (sentences) of lists (tokens)
+        # Unks the list
+        list_of_sentences = funcs.TrainUnker(funcs.TrainOpener(train_corpus))
 
-        #open text and clean each line
-        #create a list for which each index holds one line as a list of tokens in that line
-        with open(train_corpus, 'r', encoding = 'utf8') as f:
-            for line in f:
-                line = re.sub(r'\n',"" , line)
-                line = line.split() #this turns the line string into a list of tokens 
-                list_of_sentences.append(line) 
-        
-        pre_unk_counts = {}
-        total_tokens = 0
-        # go through every word in clean text and make a dictionary 
-        # with words as keys, and their counts as values
-        for i in range(0, len(list_of_sentences)):
-            for j in range(0, len(list_of_sentences[i])):    
-                if list_of_sentences[i][j] in pre_unk_counts:
-                    pre_unk_counts[list_of_sentences[i][j]] += 1
-                else:
-                    pre_unk_counts.update({list_of_sentences[i][j] : 1})
-        
-        #UNK TIME EVERYBODY ITS UNK TIME 
-        
-        
-        #Go through and replace every word that appears only once with the <UNK> token
-        for i in range(0,len(list_of_sentences)):
-            for j in range(0, len(list_of_sentences[i])):
-                if pre_unk_counts[list_of_sentences[i][j]] == 1:
-                    list_of_sentences[i][j] = '<UNK>'
-                else:
-                    pass
 
-        """
-        TODO PUT EVERYTHING ABOVE THIS IN A SEPERATE CLASS AS A GLOBAL FUNCTION
-        """
-
-        #recalculate counts with the UNKed set
-        unigram_counts = {}
-        for i in range(0, len(list_of_sentences)):
-            for j in range(0, len(list_of_sentences[i])):    
-                total_tokens += 1
-                if list_of_sentences[i][j] in unigram_counts:
-                    unigram_counts[list_of_sentences[i][j]][0] += 1
-                else:
-                    unigram_counts.update({list_of_sentences[i][j]:[1]})
         
+        # calculate counts with the UNKed set
+        unigram_counts = funcs.UniCounter(list_of_sentences)
         
-        #every key in the unigram_counts dictionary is one unique word, so our vocab size 
-        #is equal to len(unigram_counts)-1 because we don't want to inlcude UNK
+        # every key in the unigram_counts dictionary is one unique word, so our vocab size 
+        # is equal to len(unigram_counts)-1 because we don't want to inlcude UNK
         vocab_size = len(unigram_counts) - 1            
         
-        #add log probabilities to the dictionary with laplace smoothing
+
+        # make a dictionary with our probabilites (in log form with laplace smoothing)
+        
         unigram_probs = {}
+        total_tokens = len([i for x in list_of_sentences for i in x]) # this is our N for unigrams
+        
         for key in unigram_counts:
             probability = math.log(((unigram_counts[key][0] + 1) / (total_tokens + vocab_size)), 2)
             probability = round(probability, 3)
             unigram_probs.update({key: probability})
         
-        # Make a new sorted dictionary:
+        # Make a sorted dictionary 
         # Sorted first by probability (descending) then alphabetically for keys with the same value
         unigram_probs_sorted = dict(sorted(unigram_probs.items(), key = lambda x: (-x[1], x[0])))
         
