@@ -80,7 +80,7 @@ class LanguageModel:
             #keeps track of probability for each sentence
             sen_prob = 0 
             
-            for j in range(1, len(unked_test_set[i])):
+            for j in range(0, len(unked_test_set[i])):
                 
                 word_count += 1
                 sen_prob += unigram_probs[unked_test_set[i][j]]
