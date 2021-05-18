@@ -1,14 +1,8 @@
 import re
 
-class GlobalFunctions:
-
-    def __init__(self):
-        pass
-
-    
-    #open text and clean each line
-    #create a list for which each index holds one line 
-    def Opener(self, train_corpus):
+#open text and clean each line
+#create a list for which each index holds one line 
+def Opener(train_corpus):
         
         list_of_sentences = []
         
@@ -21,7 +15,7 @@ class GlobalFunctions:
         return list_of_sentences
 
 
-    def Tokenizer(self, list_of_sentences):
+def Tokenizer(list_of_sentences):
         
         #tokenize the list_of_sentences
         for i in range(0, len(list_of_sentences)):
@@ -30,9 +24,9 @@ class GlobalFunctions:
         return list_of_sentences    
 
 
-    # unks a list(sentences) of lists (tokens)
-    # if passed a dictionary will UNK all words in list_of_sentences that do not appear as keys in the dictionary
-    def Unker(self, tokenized_sentences, train_prob_dict = False):
+# unks a list(sentences) of lists (tokens)
+# if passed a dictionary will UNK all words in list_of_sentences that do not appear as keys in the dictionary
+def Unker(tokenized_sentences, train_prob_dict = False):
         
         
 
@@ -69,8 +63,8 @@ class GlobalFunctions:
     
 
 
-    # given our list of tokenized sentences returns a dictionary with counts of unigrams 
-    def UniCounter(self, list_of_sentences):
+# given our list of tokenized sentences returns a dictionary with counts of unigrams 
+def UniCounter(list_of_sentences):
 
         unigram_counts = {}
 
@@ -83,4 +77,3 @@ class GlobalFunctions:
                     unigram_counts.update({list_of_sentences[i][j]:[1]})
 
         return unigram_counts
-

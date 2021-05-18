@@ -1,10 +1,6 @@
 # !/usr/bin/python3
-import re
 import math
-import globalfunctions as gf
-
-#get our global functions
-gfuncs = gf.GlobalFunctions()
+import general
 
 # TODO: Implement a Laplace-smoothed unigram model :)
 class LanguageModel:
@@ -18,16 +14,16 @@ class LanguageModel:
         #funcs = gf.GlobalFunctions()
        
         # opens train_corpus and returns it as a list (sentences) of lists (tokens)
-        list_of_sentences = gfuncs.Opener(train_corpus)
+        list_of_sentences = general.Opener(train_corpus)
 
         # Tokenize the list of sentences (split sentences into a list of their tokens)
-        tokenized_sentences = gfuncs.Tokenizer(list_of_sentences)
+        tokenized_sentences = general.Tokenizer(list_of_sentences)
 
         # UNK the tokenized sentences
-        unked_sentences = gfuncs.Unker(tokenized_sentences)
+        unked_sentences = general.Unker(tokenized_sentences)
         
         # calculate counts with the UNKed set
-        unigram_counts = gfuncs.UniCounter(unked_sentences)
+        unigram_counts = general.UniCounter(unked_sentences)
         
         # every key in the unigram_counts dictionary is one unique word, so our vocab size 
         # is equal to len(unigram_counts)-1 because we don't want to inlcude UNK
@@ -56,13 +52,13 @@ class LanguageModel:
               
         
         # open test_corpus and save as a list of sentences 
-        test_sentences = gfuncs.Opener(test_corpus)
-        random_list = ["hello I am"]
+        test_sentences = general.Opener(test_corpus)
+
         #tokenize the sentences
-        tokenized_test = gfuncs.Tokenizer(test_sentences)
+        tokenized_test = general.Tokenizer(test_sentences)
         
         #UNK everything in the test set that doesn't appear in our vocabulary (isn't a key in unigram_probs)
-        unked_test_set = gfuncs.Unker(tokenized_test, unigram_probs)
+        unked_test_set = general.Unker(tokenized_test, unigram_probs)
 
         """
         Calculate the probability
