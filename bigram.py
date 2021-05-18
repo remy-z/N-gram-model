@@ -18,8 +18,9 @@ class LanguageModel:
 
         # Add <s> and </s> tags 
         for i in range(0, len(tokenized_sentences)):
+            
             tokenized_sentences[i].insert(0,'<s>')
-            tokenized_sentences[i].insert(-1,'</s>')  
+            tokenized_sentences[i].append('</s>')  
 
         # UNK the tokenized sentences
         unked_sentences = general.Unker(tokenized_sentences)
@@ -29,7 +30,8 @@ class LanguageModel:
 
         #get a nested dictionary of bigram counts
         bigram_counts = general.BiCounter(unked_sentences)
-
+        
+        print()
         # TODO calculate the probabilites for each bigram in bigram_counts
         # TODO put these probabilites in a dictionary with bigram as key, probability as value
 

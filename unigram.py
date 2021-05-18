@@ -34,6 +34,7 @@ class LanguageModel:
         total_tokens = len([i for x in tokenized_sentences for i in x]) # this is our N for unigrams
         
         for key in unigram_counts:
+            
             probability = math.log(((unigram_counts[key][0] + 1) / (total_tokens + vocab_size)), 2)
             probability = round(probability, 3)
             unigram_probs.update({key: probability})
@@ -75,6 +76,7 @@ class LanguageModel:
             sen_prob = 0 
             
             for j in range(0, len(unked_test_set[i])):
+                
                 word_count += 1
                 sen_prob += unigram_probs[unked_test_set[i][j]]
                 prob_cum_sum += unigram_probs[unked_test_set[i][j]]
