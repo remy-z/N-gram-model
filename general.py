@@ -80,3 +80,7 @@ def UniCounter(list_of_sentences):
                 unigram_counts.update({list_of_sentences[i][j]:[1]})
 
     return unigram_counts
+
+#TODO write a function that takes a list of sentences and returns the bigram counts of that list in a nested dictionary 
+def BiCounter():
+    pass

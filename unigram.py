@@ -10,8 +10,6 @@ class LanguageModel:
 
     def train(self, train_corpus):
         
-        #get our global functions
-        #funcs = gf.GlobalFunctions()
        
         # opens train_corpus and returns it as a list (sentences) of lists (tokens)
         list_of_sentences = general.Opener(train_corpus)
@@ -25,8 +23,8 @@ class LanguageModel:
         # calculate counts with the UNKed set
         unigram_counts = general.UniCounter(unked_sentences)
         
-        # every key in the unigram_counts dictionary is one unique word, so our vocab size 
-        # is equal to len(unigram_counts)-1 because we don't want to inlcude UNK
+        # Every key in the unigram_counts dictionary is one unique word, so our vocab size 
+        # Is equal to len(unigram_counts)-1 because we don't want to inlcude UNK
         vocab_size = len(unigram_counts) - 1            
         
 
