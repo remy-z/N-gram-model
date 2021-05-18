@@ -43,12 +43,17 @@ class LanguageModel:
         # Sorted first by probability (descending) then alphabetically for keys with the same value
         unigram_probs_sorted = dict(sorted(unigram_probs.items(), key = lambda x: (-x[1], x[0])))
         
-        return unigram_probs_sorted
+        
+        train_data = [unigram_probs_sorted, unigram_counts]
+
+        return train_data
 
 
 
-    def score(self, test_corpus, unigram_probs):
-              
+    def score(self, test_corpus, train_data):
+
+        unigram_probs = train_data[0]
+        unigram_counts = train_data[1]      
         
         # open test_corpus and save as a list of sentences 
         test_sentences = general.Opener(test_corpus)
@@ -57,8 +62,8 @@ class LanguageModel:
         #tokenize the sentences
         tokenized_test = general.Tokenizer(test_sentences)
         
-        #UNK everything in the test set that doesn't appear in our vocabulary (isn't a key in unigram_probs)
-        unked_test_set = general.Unker(tokenized_test, unigram_probs)
+        #UNK everything in the test set that doesn't appear in our vocabulary
+        unked_test_set = general.Unker(tokenized_test, unigram_counts)
 
         """
         Calculate the probability
@@ -75,7 +80,7 @@ class LanguageModel:
             #keeps track of probability for each sentence
             sen_prob = 0 
             
-            for j in range(0, len(unked_test_set[i])):
+            for j in range(1, len(unked_test_set[i])):
                 
                 word_count += 1
                 sen_prob += unigram_probs[unked_test_set[i][j]]

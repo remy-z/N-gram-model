@@ -46,10 +46,70 @@ class LanguageModel:
         
         bigram_probs_sorted = dict(sorted(bigram_probs.items(), key = lambda x: (-x[1], x[0])))
 
-        return bigram_probs_sorted  
+       
+        train_data = [bigram_probs_sorted, unigram_counts]
+
+        return train_data  
 
 
 
-    def score(self, test_corpus, bigram_probs):
-        sentences_and_probs = []
+    def score(self, test_corpus, train_data):
+        
+        bigram_probs = train_data[0]
+        unigram_counts = train_data[1]
+        vocab_size = len(unigram_counts) - 2
+
+        # open test_corpus and save as a list of sentences 
+        test_sentences = general.Opener(test_corpus)
+        
+        
+        # tokenize the sentences
+        tokenized_test = general.Tokenizer(test_sentences)
+        
+        # Add <s> and </s> tags 
+        for i in range(0, len(tokenized_test)):
+            
+            tokenized_test[i].insert(0,'<s>')
+            tokenized_test[i].append('</s>')  
+
+        # UNK everything in the test set that doesn't appear in our vocabulary
+        unked_test_set = general.Unker(tokenized_test, unigram_counts)
+
+        # calculate the probability
+
+        prob_cum_sum = 0   # this is the sum of probabilities for every sentence
+        word_count = 0     # this is our N for calculating perplexity
+        list_of_probs = [] #keep track of our probabilites 
+        
+        for i in range(0, len(unked_test_set)):
+
+            sen_prob = 0
+
+            for j in range(1, len(unked_test_set[i])):
+                
+                word_count += 1
+
+                if "{} {}".format(unked_test_set[i][j-1],unked_test_set[i][j]) in bigram_probs:
+                    
+                    sen_prob += bigram_probs["{} {}".format(unked_test_set[i][j-1],unked_test_set[i][j])]
+                    prob_cum_sum += bigram_probs["{} {}".format(unked_test_set[i][j-1],unked_test_set[i][j])]
+                else:
+                    
+                    sen_prob += math.log( ((1) / (unigram_counts[unked_test_set[i][j-1]] + vocab_size)), 2)
+                    prob_cum_sum += math.log( ((1) / (unigram_counts[unked_test_set[i][j-1]] + vocab_size)), 2)
+                
+            list_of_probs.append(round(sen_prob,3))    
+
+
+
+        # make a list of sentences and their corresponding probabilities to return 
+        sentences_and_probs = list(zip(test_sentences, list_of_probs))
+
+        #calculate perplexity and add it as the list entry to the list we return
+        h = (-1 / word_count) * (prob_cum_sum)
+        perplexity = round(math.pow(2,h), 3)
+        
+        #add perplexity as the last index of the list we return
+        sentences_and_probs.append(("perplexity: ", perplexity))
+        
         return sentences_and_probs

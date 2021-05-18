@@ -30,19 +30,20 @@ def Tokenizer(list_of_sentences):
 
 # unks all tokens that appear only once in a list(sentences) of lists (tokens)
 # if passed a dictionary: will UNK all words in list_of_sentences that do not appear as keys in the dictionary
-def Unker(list_of_sentences, train_prob_dict = False):
+def Unker(list_of_sentences, unigram_counts = False):
+    
     
     tokenized_sentences = copy.deepcopy(list_of_sentences)       
 
     #if passed a dictionary 
-    if train_prob_dict:
+    if unigram_counts:
         
         # UNK every word that doesn't appear as a dictionary key (in our vocabulary) 
         for i in range(0, len(tokenized_sentences)):
             
             for j in range(0, len(tokenized_sentences[i])):
                 
-                if tokenized_sentences[i][j] not in train_prob_dict:
+                if tokenized_sentences[i][j] not in unigram_counts:
                     tokenized_sentences[i][j] = "<UNK>"
 
 

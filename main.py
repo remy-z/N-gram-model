@@ -58,8 +58,9 @@ def main():
     # train the language model
     # save probabilities to a dictionary
     print()
-    lm_probs = lm.train(args.train_corpus)
-    
+    lm_train_data = lm.train(args.train_corpus)
+    lm_probs = lm_train_data[0]
+
     #output the results
     for key in lm_probs:
         print("{} {}".format(key, lm_probs[key]))
@@ -71,8 +72,9 @@ def main():
     # and perplexity of entire testset
     
     if args.test_corpus:
-        print()
-        score = lm.score(args.test_corpus, lm_probs)
+        
+        score = lm.score(args.test_corpus, lm_train_data)
+        
         for i in range(0, len(score)):
             print("{}  {}".format(score[i][0],score[i][1]))
     print()
