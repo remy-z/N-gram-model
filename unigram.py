@@ -33,7 +33,7 @@ class LanguageModel:
         # make a dictionary with our probabilites (in log form with laplace smoothing)
         
         unigram_probs = {}
-        total_tokens = len([i for x in list_of_sentences for i in x]) # this is our N for unigrams
+        total_tokens = len([i for x in tokenized_sentences for i in x]) # this is our N for unigrams
         
         for key in unigram_counts:
             probability = math.log(((unigram_counts[key][0] + 1) / (total_tokens + vocab_size)), 2)
@@ -52,11 +52,11 @@ class LanguageModel:
               
         
         # open test_corpus and save as a list of sentences 
-        test_sentence_strings = general.Opener(test_corpus)
-        test_sentences = test_sentence_strings.copy()
+        test_sentences = general.Opener(test_corpus)
+        
         
         #tokenize the sentences
-        tokenized_test = general.Tokenizer(test_sentence_strings)
+        tokenized_test = general.Tokenizer(test_sentences)
         
         #UNK everything in the test set that doesn't appear in our vocabulary (isn't a key in unigram_probs)
         unked_test_set = general.Unker(tokenized_test, unigram_probs)

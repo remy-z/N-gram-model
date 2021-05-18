@@ -1,5 +1,5 @@
 import re
-
+import copy
 #open text and clean each line
 #create a list for which each index holds one line 
 def Opener(train_corpus):
@@ -16,22 +16,25 @@ def Opener(train_corpus):
 
 
 def Tokenizer(list_of_sentences):
-        
+    
+    list_copy = list_of_sentences.copy() 
+
     #tokenize the list_of_sentences
-    for i in range(0, len(list_of_sentences)):
-        list_of_sentences[i] = list_of_sentences[i].split()
+    for i in range(0, len(list_copy)):
+        list_copy[i] = list_copy[i].split()
         
-    return list_of_sentences    
+    return list_copy   
 
 
-# unks a list(sentences) of lists (tokens)
-# if passed a dictionary will UNK all words in list_of_sentences that do not appear as keys in the dictionary
-def Unker(tokenized_sentences, train_prob_dict = False):
-        
-        
+# unks all tokens that appear only once in a list(sentences) of lists (tokens)
+# if passed a dictionary: will UNK all words in list_of_sentences that do not appear as keys in the dictionary
+def Unker(list_of_sentences, train_prob_dict = False):
+    
+    tokenized_sentences = copy.deepcopy(list_of_sentences)       
 
     #if passed a dictionary 
     if train_prob_dict:
+        
         # UNK every word that doesn't appear as a dictionary key (in our vocabulary) 
         for i in range(0, len(tokenized_sentences)):
             for j in range(0, len(tokenized_sentences[i])):
