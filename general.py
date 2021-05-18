@@ -86,11 +86,11 @@ def UniCounter(list_of_sentences):
                 
             if list_of_sentences[i][j] in unigram_counts:
                 
-                unigram_counts[list_of_sentences[i][j]][0] += 1
+                unigram_counts[list_of_sentences[i][j]] += 1
             
             else:
 
-                unigram_counts.update({list_of_sentences[i][j]:[1]})
+                unigram_counts.update({list_of_sentences[i][j]: 1})
 
     return unigram_counts
 

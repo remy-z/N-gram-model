@@ -35,7 +35,7 @@ class LanguageModel:
         
         for key in unigram_counts:
             
-            probability = math.log(((unigram_counts[key][0] + 1) / (total_tokens + vocab_size)), 2)
+            probability = math.log(((unigram_counts[key] + 1) / (total_tokens + vocab_size)), 2)
             probability = round(probability, 3)
             unigram_probs.update({key: probability})
         

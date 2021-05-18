@@ -31,10 +31,25 @@ class LanguageModel:
         #get a nested dictionary of bigram counts
         bigram_counts = general.BiCounter(unked_sentences)
         
-        print()
-        # TODO calculate the probabilites for each bigram in bigram_counts
-        # TODO put these probabilites in a dictionary with bigram as key, probability as value
+        # subtract both UNK and <s> from vocab size
+        vocab_size = len(unigram_counts) - 2
+        bigram_probs = {}
+
+        
+        for k in bigram_counts:
+
+            for nk in bigram_counts[k]:
+                
+                probability = math.log( ((bigram_counts[k][nk] + 1) / (unigram_counts[nk] + vocab_size)), 2)
+                probability = round(probability, 3)
+                bigram_probs.update({"{} {}".format(nk,k): probability})
+        
+        bigram_probs_sorted = dict(sorted(bigram_probs.items(), key = lambda x: (-x[1], x[0])))
+
+        return bigram_probs_sorted  
 
 
-    def score(self, test_corpus):
-        print('I am an unimplemented BIGRAM score() method.')  # delete this!
+
+    def score(self, test_corpus, bigram_probs):
+        sentences_and_probs = []
+        return sentences_and_probs
