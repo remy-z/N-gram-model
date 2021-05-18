@@ -52,10 +52,11 @@ class LanguageModel:
               
         
         # open test_corpus and save as a list of sentences 
-        test_sentences = general.Opener(test_corpus)
-
+        test_sentence_strings = general.Opener(test_corpus)
+        test_sentences = test_sentence_strings.copy()
+        
         #tokenize the sentences
-        tokenized_test = general.Tokenizer(test_sentences)
+        tokenized_test = general.Tokenizer(test_sentence_strings)
         
         #UNK everything in the test set that doesn't appear in our vocabulary (isn't a key in unigram_probs)
         unked_test_set = general.Unker(tokenized_test, unigram_probs)
