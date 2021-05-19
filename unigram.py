@@ -7,6 +7,10 @@ class LanguageModel:
 
     def __init__(self):
         pass
+    
+    vocab_size = 0
+    unigram_counts = {}
+    unigram_probs = {}
 
     def train(self, train_corpus):
         
@@ -21,36 +25,26 @@ class LanguageModel:
         unked_sentences = general.Unker(tokenized_sentences)
         
         # calculate counts with the UNKed set
-        unigram_counts = general.UniCounter(unked_sentences)
+        LanguageModel.unigram_counts = general.UniCounter(unked_sentences)
         
-        vocab_size = len(unigram_counts)            
-        
-        # make a dictionary with our probabilites (in log form with laplace smoothing)
-        
-        unigram_probs = {}
+        LanguageModel.vocab_size = len(LanguageModel.unigram_counts)                       
         total_tokens = len([i for x in tokenized_sentences for i in x]) # this is our N for unigrams
         
-        for key in unigram_counts:
+        for key in LanguageModel.unigram_counts:
             
-            probability = math.log(((unigram_counts[key] + 1) / (total_tokens + vocab_size)), 2)
+            probability = math.log(((LanguageModel.unigram_counts[key] + 1) / (total_tokens + LanguageModel.vocab_size)), 2)
             probability = round(probability, 3)
-            unigram_probs.update({key: probability})
+            LanguageModel.unigram_probs.update({key: probability})
         
         # Make a sorted dictionary 
         # Sorted first by probability (descending) then alphabetically for keys with the same value
-        unigram_probs_sorted = dict(sorted(unigram_probs.items(), key = lambda x: (-x[1], x[0])))
+        unigram_probs_sorted = dict(sorted(LanguageModel.unigram_probs.items(), key = lambda x: (-x[1], x[0])))
         
-        
-        train_data = [unigram_probs_sorted, unigram_counts]
-
-        return train_data
+        return unigram_probs_sorted
 
 
 
-    def score(self, test_corpus, train_data):
-
-        unigram_probs = train_data[0]
-        unigram_counts = train_data[1]      
+    def score(self, test_corpus):    
         
         # open test_corpus and save as a list of sentences 
         test_sentences = general.Opener(test_corpus)
@@ -60,21 +54,22 @@ class LanguageModel:
         tokenized_test = general.Tokenizer(test_sentences)
         
         #UNK everything in the test set that doesn't appear in our vocabulary
-        unked_test_set = general.Unker(tokenized_test, unigram_counts)
+        unked_test_set = general.Unker(tokenized_test, LanguageModel.unigram_counts)
 
-        prob_cum_sum = 0   # this is the sum of probabilities for every sentence
-        word_count = 0     # this is our N for calculating perplexity
-        list_of_probs = [] #keep track of our probabilites 
+        prob_cum_sum = 0   # cumulative probability
+        word_count = 0     # N for calculating perplexity
+        list_of_probs = [] # probabilites for each sentence 
         
         for i in range(0, len(unked_test_set)):
+            
             #keeps track of probability for each sentence
             sen_prob = 0 
             
             for j in range(0, len(unked_test_set[i])):
                 
                 word_count += 1
-                sen_prob += unigram_probs[unked_test_set[i][j]]
-                prob_cum_sum += unigram_probs[unked_test_set[i][j]]
+                sen_prob += LanguageModel.unigram_probs[unked_test_set[i][j]]
+                prob_cum_sum += LanguageModel.unigram_probs[unked_test_set[i][j]]
             
             list_of_probs.append(round(sen_prob,3))
         

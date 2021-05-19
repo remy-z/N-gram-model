@@ -7,68 +7,72 @@ class LanguageModel:
 
     def __init__(self):
         pass
+    
+    unigram_counts = {}
+    vocab_size = 0
+    bigram_counts = {}
+    bigram_probs = {}
 
     def train(self, train_corpus):
         
-        # Opens train_corpus and returns it as a list (sentences) of lists (tokens)
+        # Opens train_corpus and returns it as a list of sentences
         list_of_sentences = general.Opener(train_corpus)
 
         # Tokenize the list of sentences (split sentences into a list of their tokens)
         tokenized_sentences = general.Tokenizer(list_of_sentences)
 
-        # Add <s> and </s> tags 
-        for i in range(len(tokenized_sentences)):
-            
-            tokenized_sentences[i].insert(0,'<s>')
-            tokenized_sentences[i].append('</s>')  
-
         # UNK the tokenized sentences
         unked_sentences = general.Unker(tokenized_sentences)
+
+        # Add <s> and </s> tags 
+        for i in range(len(unked_sentences)):            
+            unked_sentences[i].insert(0,'<s>')
+            unked_sentences[i].append('</s>')  
         
         # Get Unigram counts that will be needed for calculating bigram probability
-        unigram_counts = general.UniCounter(unked_sentences)
+        LanguageModel.unigram_counts = general.UniCounter(unked_sentences)
 
         #get a nested dictionary of bigram counts
-        bigram_counts = general.BiCounter(unked_sentences)
+        LanguageModel.bigram_counts = general.BiCounter(unked_sentences)
         
         # exclude <s> from vocab size
-        vocab_size = len(unigram_counts) - 1
+        vocab_size = len(LanguageModel.unigram_counts) - 1
         
-        bigram_probs = {}
-        for k in bigram_counts:
+        
 
-            for nk in bigram_counts[k]:
+        for k in LanguageModel.bigram_counts:
+
+            for nk in LanguageModel.bigram_counts[k]:
                 
-                probability = math.log( ((bigram_counts[k][nk] + 1) / (unigram_counts[nk] + vocab_size)), 2)
+                probability = math.log( ((LanguageModel.bigram_counts[k][nk] + 1) / (LanguageModel.unigram_counts[nk] + vocab_size)), 2)
                 probability = round(probability, 3)
-                bigram_probs.update({"{} {}".format(nk,k): probability})
+                LanguageModel.bigram_probs.update({"{} {}".format(nk,k): probability})
         
-        bigram_probs_sorted = dict(sorted(bigram_probs.items(), key = lambda x: (-x[1], x[0])))
+        bigram_probs_sorted = dict(sorted(LanguageModel.bigram_probs.items(), key = lambda x: (-x[1], x[0])))
 
-        train_data = [bigram_probs_sorted, unigram_counts]
-
-        return train_data  
+        return bigram_probs_sorted  
 
 
 
-    def score(self, test_corpus, train_data):
+    def score(self, test_corpus):
         
-        bigram_probs = train_data[0]
-        unigram_counts = train_data[1]
-        vocab_size = len(unigram_counts) - 1 #exclude <s>
+        #unigram_counts = train_data[1]
+        vocab_size = len(LanguageModel.unigram_counts) - 1 #exclude <s>
 
         # open test_corpus and save as a list of sentences 
         test_sentences = general.Opener(test_corpus) 
         # tokenize the sentences
         tokenized_test = general.Tokenizer(test_sentences)
-        # Add <s> and </s> tags 
-        for i in range(0, len(tokenized_test)):
-            
-            tokenized_test[i].insert(0,'<s>')
-            tokenized_test[i].append('</s>')  
-
         # UNK everything in the test set that doesn't appear in our vocabulary
-        unked_test_set = general.Unker(tokenized_test, unigram_counts)
+        unked_test_set = general.Unker(tokenized_test, LanguageModel.unigram_counts)
+        
+        # Add <s> and </s> tags 
+        for i in range(0, len(unked_test_set)):
+            
+            unked_test_set[i].insert(0,'<s>')
+            unked_test_set[i].append('</s>')  
+
+        
 
         # calculate the probability
 
@@ -84,15 +88,15 @@ class LanguageModel:
                 
                 word_count += 1
 
-                if "{} {}".format(unked_test_set[i][j-1],unked_test_set[i][j]) in bigram_probs:
+                if "{} {}".format(unked_test_set[i][j-1],unked_test_set[i][j]) in LanguageModel.bigram_probs:
                     
-                    sen_prob += bigram_probs["{} {}".format(unked_test_set[i][j-1],unked_test_set[i][j])]
-                    prob_cum_sum += bigram_probs["{} {}".format(unked_test_set[i][j-1],unked_test_set[i][j])]
+                    sen_prob += LanguageModel.bigram_probs["{} {}".format(unked_test_set[i][j-1],unked_test_set[i][j])]
+                    prob_cum_sum += LanguageModel.bigram_probs["{} {}".format(unked_test_set[i][j-1],unked_test_set[i][j])]
 
                 else:
                     
-                    sen_prob += math.log( ((1) / (unigram_counts[unked_test_set[i][j-1]] + vocab_size)), 2)
-                    prob_cum_sum += math.log( ((1) / (unigram_counts[unked_test_set[i][j-1]] + vocab_size)), 2)
+                    sen_prob += math.log( ((1) / (LanguageModel.unigram_counts[unked_test_set[i][j-1]] + vocab_size)), 2)
+                    prob_cum_sum += math.log( ((1) / (LanguageModel.unigram_counts[unked_test_set[i][j-1]] + vocab_size)), 2)
                 
             list_of_probs.append(round(sen_prob,3))    
 

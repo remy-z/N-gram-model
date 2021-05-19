@@ -58,8 +58,8 @@ def main():
     # train the language model
     # save probabilities to a dictionary
     print()
-    lm_train_data = lm.train(args.train_corpus)
-    lm_probs = lm_train_data[0]
+    lm_probs = lm.train(args.train_corpus)
+    
 
     #output the results
     for key in lm_probs:
@@ -73,7 +73,7 @@ def main():
     
     if args.test_corpus:
         
-        score = lm.score(args.test_corpus, lm_train_data)
+        score = lm.score(args.test_corpus)
         
         for i in range(0, len(score)):
             print("{}  {}".format(score[i][0],score[i][1]))

@@ -32,7 +32,6 @@ def Tokenizer(list_of_sentences):
 # if passed a dictionary: will UNK all words in list_of_sentences that do not appear as keys in the dictionary
 def Unker(list_of_sentences, unigram_counts = False):
     
-    
     tokenized_sentences = copy.deepcopy(list_of_sentences)       
 
     #if passed a dictionary 
@@ -111,3 +110,29 @@ def BiCounter(list_of_sentences):
                     bigram_counts[list_of_sentences[i][j]][list_of_sentences[i][j-1]] += 1
 
     return bigram_counts
+
+def TriCounter(list_of_sentences):
+    
+    trigram_counts = {}
+    
+    for i in range(0, len(list_of_sentences)):
+        
+        for j in range(2,len(list_of_sentences[i])):
+
+            if list_of_sentences[i][j] not in trigram_counts:
+                
+                trigram_counts.update( { list_of_sentences[i][j] : {(list_of_sentences[i][j-2], list_of_sentences[i][j-1]): 1} } )
+
+            else:
+                
+                if (list_of_sentences[i][j-2], list_of_sentences[i][j-1]) not in trigram_counts[list_of_sentences[i][j]]:
+
+                    trigram_counts[list_of_sentences[i][j]].update({(list_of_sentences[i][j-2], list_of_sentences[i][j-1]): 1 })
+
+                    
+                
+                else:
+
+                    trigram_counts[list_of_sentences[i][j]][(list_of_sentences[i][j-2], list_of_sentences[i][j-1])] += 1
+
+    return trigram_counts
