@@ -23,11 +23,8 @@ class LanguageModel:
         # calculate counts with the UNKed set
         unigram_counts = general.UniCounter(unked_sentences)
         
-        # Every key in the unigram_counts dictionary is one unique word, so our vocab size 
-        # Is equal to len(unigram_counts)-1 because we don't want to inlcude UNK
-        vocab_size = len(unigram_counts) - 1            
+        vocab_size = len(unigram_counts)            
         
-
         # make a dictionary with our probabilites (in log form with laplace smoothing)
         
         unigram_probs = {}

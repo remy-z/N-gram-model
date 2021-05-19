@@ -31,8 +31,8 @@ class LanguageModel:
         #get a nested dictionary of bigram counts
         bigram_counts = general.BiCounter(unked_sentences)
         
-        # subtract both UNK and <s> from vocab size
-        vocab_size = len(unigram_counts) - 2
+        # exclude <s> from vocab size
+        vocab_size = len(unigram_counts) - 1
         
         bigram_probs = {}
         for k in bigram_counts:
@@ -55,7 +55,7 @@ class LanguageModel:
         
         bigram_probs = train_data[0]
         unigram_counts = train_data[1]
-        vocab_size = len(unigram_counts) - 2
+        vocab_size = len(unigram_counts) - 1 #exclude <s>
 
         # open test_corpus and save as a list of sentences 
         test_sentences = general.Opener(test_corpus) 
