@@ -65,13 +65,6 @@ class LanguageModel:
         #UNK everything in the test set that doesn't appear in our vocabulary
         unked_test_set = general.Unker(tokenized_test, unigram_counts)
 
-        """
-        Calculate the probability
-        all of our probabilities are log probabilities, so we can just 
-        add probabilites for each individual sentence,
-        and keep a running probability for calculating perplexity
-        """
-
         prob_cum_sum = 0   # this is the sum of probabilities for every sentence
         word_count = 0     # this is our N for calculating perplexity
         list_of_probs = [] #keep track of our probabilites 

@@ -21,7 +21,7 @@ def Tokenizer(list_of_sentences):
     list_copy = list_of_sentences.copy() 
 
     #tokenize the list_of_sentences
-    for i in range(0, len(list_copy)):
+    for i in range(len(list_copy)):
         
         list_copy[i] = list_copy[i].split()
         
@@ -39,33 +39,21 @@ def Unker(list_of_sentences, unigram_counts = False):
     if unigram_counts:
         
         # UNK every word that doesn't appear as a dictionary key (in our vocabulary) 
-        for i in range(0, len(tokenized_sentences)):
+        for i in range(len(tokenized_sentences)):
             
-            for j in range(0, len(tokenized_sentences[i])):
+            for j in range(len(tokenized_sentences[i])):
                 
                 if tokenized_sentences[i][j] not in unigram_counts:
                     tokenized_sentences[i][j] = "<UNK>"
 
 
     else:
-        pre_unk_counts = {}
-
-        # go through every word in list and make a dictionary 
-        # with words as keys, and their counts as values
-        for i in range(0, len(tokenized_sentences)):
-            
-            for j in range(0, len(tokenized_sentences[i])):    
-                
-                if tokenized_sentences[i][j] in pre_unk_counts:
-                    pre_unk_counts[tokenized_sentences[i][j]] += 1
-                
-                else:
-                    pre_unk_counts.update({tokenized_sentences[i][j] : 1})
+        pre_unk_counts = UniCounter(tokenized_sentences)
         
         #Go through and replace every word that appears only once with the <UNK> token
-        for i in range(0,len(tokenized_sentences)):
+        for i in range(len(tokenized_sentences)):
             
-            for j in range(0, len(tokenized_sentences[i])):
+            for j in range(len(tokenized_sentences[i])):
                 
                 if pre_unk_counts[tokenized_sentences[i][j]] == 1:
                     tokenized_sentences[i][j] = '<UNK>'
@@ -81,9 +69,9 @@ def UniCounter(list_of_sentences):
 
     unigram_counts = {}
 
-    for i in range(0, len(list_of_sentences)):
+    for i in range(len(list_of_sentences)):
         
-        for j in range(0, len(list_of_sentences[i])):    
+        for j in range(len(list_of_sentences[i])):    
                 
             if list_of_sentences[i][j] in unigram_counts:
                 
@@ -96,7 +84,7 @@ def UniCounter(list_of_sentences):
     return unigram_counts
 
 
-#TODO write a function that takes a list of sentences and returns the bigram counts of that list in a nested dictionary 
+# A function that takes a list of sentences and returns the bigram counts of that list in a nested dictionary 
 
 def BiCounter(list_of_sentences):
     
