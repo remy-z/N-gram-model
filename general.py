@@ -1,5 +1,6 @@
 import re
 import copy
+
 #open text and clean each line
 #create a list for which each index holds one line 
 def Opener(train_corpus):
@@ -15,7 +16,7 @@ def Opener(train_corpus):
         
     return list_of_sentences
 
-
+# split list of sentences into a list of lists (sentences into a list of its tokens) 
 def Tokenizer(list_of_sentences):
     
     list_copy = list_of_sentences.copy() 
@@ -30,36 +31,33 @@ def Tokenizer(list_of_sentences):
 
 # unks all tokens that appear only once in a list(sentences) of lists (tokens)
 # if passed a dictionary: will UNK all words in list_of_sentences that do not appear as keys in the dictionary
-def Unker(list_of_sentences, unigram_counts = False):
-    
-    tokenized_sentences = copy.deepcopy(list_of_sentences)       
+def Unker(list_of_sentences, unigram_counts = False):       
 
     #if passed a dictionary 
     if unigram_counts:
         
         # UNK every word that doesn't appear as a dictionary key (in our vocabulary) 
-        for i in range(len(tokenized_sentences)):
+        for i in range(len(list_of_sentences)):
             
-            for j in range(len(tokenized_sentences[i])):
+            for j in range(len(list_of_sentences[i])):
                 
-                if tokenized_sentences[i][j] not in unigram_counts:
-                    tokenized_sentences[i][j] = "<UNK>"
-
+                if list_of_sentences[i][j] not in unigram_counts:
+                    list_of_sentences[i][j] = "<UNK>"
 
     else:
-        pre_unk_counts = UniCounter(tokenized_sentences)
+        pre_unk_counts = UniCounter(list_of_sentences)
         
         #Go through and replace every word that appears only once with the <UNK> token
-        for i in range(len(tokenized_sentences)):
+        for i in range(len(list_of_sentences)):
             
-            for j in range(len(tokenized_sentences[i])):
+            for j in range(len(list_of_sentences[i])):
                 
-                if pre_unk_counts[tokenized_sentences[i][j]] == 1:
-                    tokenized_sentences[i][j] = '<UNK>'
+                if pre_unk_counts[list_of_sentences[i][j]] == 1:
+                    list_of_sentences[i][j] = '<UNK>'
                 else:
                     pass
 
-    return tokenized_sentences
+    return list_of_sentences
     
 
 
@@ -84,7 +82,6 @@ def UniCounter(list_of_sentences):
 
 
 # A function that takes a list of sentences and returns the bigram counts of that list in a nested dictionary 
-
 def BiCounter(list_of_sentences):
     
     bigram_counts = {}
@@ -102,15 +99,14 @@ def BiCounter(list_of_sentences):
                 if list_of_sentences[i][j-1] not in bigram_counts[list_of_sentences[i][j]]:
 
                     bigram_counts[list_of_sentences[i][j]].update({list_of_sentences[i][j-1]: 1 })
-
-                    
-                
+   
                 else:
 
                     bigram_counts[list_of_sentences[i][j]][list_of_sentences[i][j-1]] += 1
 
     return bigram_counts
 
+# trigram counts :)
 def TriCounter(list_of_sentences):
     
     trigram_counts = {}
@@ -129,8 +125,6 @@ def TriCounter(list_of_sentences):
 
                     trigram_counts[list_of_sentences[i][j]].update({(list_of_sentences[i][j-2], list_of_sentences[i][j-1]): 1 })
 
-                    
-                
                 else:
 
                     trigram_counts[list_of_sentences[i][j]][(list_of_sentences[i][j-2], list_of_sentences[i][j-1])] += 1
