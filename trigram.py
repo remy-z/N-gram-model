@@ -55,7 +55,6 @@ class LanguageModel:
 
         return trigram_probs_sorted  
         
-        return "lets FUCKING GO"
 
     def score(self, test_corpus):
         print('I am an unimplemented TRIGRAM score() method.')  # delete this!
