@@ -72,7 +72,7 @@ class LanguageModel:
         for i in range(0, len(test_sentences)):
 
             sen_prob = 0
-
+            #word_count += 1 #include <s> in our word count(N)?
             for j in range(1, len(test_sentences[i])):
                 
                 word_count += 1
