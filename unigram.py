@@ -28,14 +28,14 @@ class LanguageModel:
         for key in LanguageModel.unigram_counts:
             
             probability = math.log(((LanguageModel.unigram_counts[key] + 1) / (total_tokens + LanguageModel.vocab_size)), 2)
-            probability = round(probability, 3)
+            #probability = round(probability, 3)
             LanguageModel.unigram_probs.update({key: probability})
         
         # sort the probabilites
         unigram_probs_sorted = dict(sorted(LanguageModel.unigram_probs.items(), key = lambda x: (-x[1], x[0])))
         
         for key in unigram_probs_sorted:
-            print("{} {}".format(key, unigram_probs_sorted[key]))
+            print("{} {}".format(key, round(unigram_probs_sorted[key], 3)))
 
 
 

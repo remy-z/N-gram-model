@@ -42,7 +42,7 @@ class LanguageModel:
             for nk in LanguageModel.trigram_counts[k]:
                 
                 probability = math.log( ((LanguageModel.trigram_counts[k][nk] + 1) / (LanguageModel.bigram_counts[nk[1]][nk[0]] + LanguageModel.vocab_size)), 2)
-                probability = round(probability, 3)
+                #probability = round(probability, 3)
                 LanguageModel.trigram_probs.update({"{} {} {}".format(nk[0], nk[1], k): probability})
         
         #sort the probabilites
@@ -50,7 +50,7 @@ class LanguageModel:
 
         #output the sorted probabilites
         for key in trigram_probs_sorted:
-            print("{} {}".format(key, trigram_probs_sorted[key]))
+            print("{} {}".format(key, round(trigram_probs_sorted[key], 3)))
           
         
 
