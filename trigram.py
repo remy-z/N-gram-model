@@ -138,7 +138,7 @@ class LanguageModel:
                     sen_prob += LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
                     prob_cum_sum += LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
                     # print("In trigram probs: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
-                    unigrams += 1
+                    trigrams += 1
                 # if we don't have that trigram, check for n-1, n bigram
                 elif "{} {}".format(test_sentences[i][j-1], test_sentences[i][j]) in LanguageModel.bigram_probs:
                     sen_prob += math.log(0.4, 2) + LanguageModel.bigram_probs["{} {}".format(test_sentences[i][j-1], test_sentences[i][j])]
@@ -158,7 +158,7 @@ class LanguageModel:
                         prob_cum_sum += LanguageModel.unigram_probs[test_sentences[i][j]]
                     # print("Sadge: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
                     # print("    " + test_sentences[i][j])
-                    trigrams += 1
+                    unigrams += 1
             list_of_probs.append(round(sen_prob, 3))
         sentences_and_probs = list(zip(test_sentence_strings, list_of_probs))
 
