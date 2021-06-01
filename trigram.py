@@ -41,8 +41,8 @@ class LanguageModel:
 
         # print stuff to check it's equal to other unigrams
         unigram_probs_sorted = dict(sorted(LanguageModel.unigram_probs.items(), key=lambda x: (-x[1], x[0])))
-        for key in unigram_probs_sorted:
-            print("{} {}".format(key, round(unigram_probs_sorted[key], 3)))
+        #for key in unigram_probs_sorted:
+        #    print("{} {}".format(key, round(unigram_probs_sorted[key], 3)))
         print()
         print()
 
@@ -72,8 +72,8 @@ class LanguageModel:
         # print stuff for general clarity and checking against our other bigram model
         bigram_probs_sorted = dict(sorted(LanguageModel.bigram_probs.items(), key = lambda x: (-x[1], x[0])))
 
-        for key in bigram_probs_sorted:
-            print("{} {}".format(key, round(bigram_probs_sorted[key], 3)))
+       # for key in bigram_probs_sorted:
+       #     print("{} {}".format(key, round(bigram_probs_sorted[key], 3)))
 
         print()
         print()
@@ -88,8 +88,8 @@ class LanguageModel:
         LanguageModel.bigram_counts = general.BiCounter(train_sentences)
         LanguageModel.trigram_counts = general.TriCounter(train_sentences)
 
-        # substract both <s> tags
-        LanguageModel.vocab_size = len(LanguageModel.trigram_counts) - 2
+        # vocab size excluding <s>
+        LanguageModel.vocab_size = len(LanguageModel.trigram_counts) - 1
 
         for k in LanguageModel.trigram_counts:
             for nk in LanguageModel.trigram_counts[k]:
@@ -101,8 +101,8 @@ class LanguageModel:
         trigram_probs_sorted = dict(sorted(LanguageModel.trigram_probs.items(), key = lambda x: (-x[1], x[0])))
 
         #output the sorted probabilites
-        for key in trigram_probs_sorted:
-            print("{} {}".format(key, round(trigram_probs_sorted[key], 3)))
+        #for key in trigram_probs_sorted:
+        #    print("{} {}".format(key, round(trigram_probs_sorted[key], 3)))
           
         
 
@@ -138,7 +138,7 @@ class LanguageModel:
                     sen_prob += LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
                     prob_cum_sum += LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
                     # print("In trigram probs: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
-                    unigrams += 1
+                    trigrams += 1
                 # if we don't have that trigram, check for n-1, n bigram
                 elif "{} {}".format(test_sentences[i][j-1], test_sentences[i][j]) in LanguageModel.bigram_probs:
                     sen_prob += math.log(0.4, 2) + LanguageModel.bigram_probs["{} {}".format(test_sentences[i][j-1], test_sentences[i][j])]
@@ -150,15 +150,15 @@ class LanguageModel:
                 else:
                     # improv solution for calculating unigram prob for end sentence token
                     if test_sentences[i][j] == "</s>":
-                        sen_prob += + math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
-                        prob_cum_sum += math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
+                        sen_prob += math.log(0.16,2) + math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
+                        prob_cum_sum += math.log(0.16,2) + math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
                     # general case
                     else:
-                        sen_prob += LanguageModel.unigram_probs[test_sentences[i][j]]
-                        prob_cum_sum += LanguageModel.unigram_probs[test_sentences[i][j]]
+                        sen_prob += math.log(0.16,2) + LanguageModel.unigram_probs[test_sentences[i][j]]
+                        prob_cum_sum += math.log(0.16,2) + LanguageModel.unigram_probs[test_sentences[i][j]]
                     # print("Sadge: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
                     # print("    " + test_sentences[i][j])
-                    trigrams += 1
+                    unigrams += 1
             list_of_probs.append(round(sen_prob, 3))
         sentences_and_probs = list(zip(test_sentence_strings, list_of_probs))
 
