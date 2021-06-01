@@ -135,8 +135,8 @@ class LanguageModel:
                 # stupid backoff implementation using unigram, bigram and trigram probabilities
                 # If we have n-2, n-1, n trigram use that probability
                 if "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]) in LanguageModel.trigram_probs:
-                    sen_prob += LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
-                    prob_cum_sum += LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
+                    sen_prob += math.log(0.16, 2) + LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
+                    prob_cum_sum += math.log(0.16, 2) + LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
                     # print("In trigram probs: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
                     trigrams += 1
                 # if we don't have that trigram, check for n-1, n bigram
