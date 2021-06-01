@@ -1,0 +1,23 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "C:\\Users\\Remy\\Documents\\spring2021\\ling472\\LING472_project\\data\\austen-train.txt",
+                //"C:\\Users\\Remy\\Documents\\spring2021\\ling472\\LING472_project\\data\\toy-train.txt",
+                "-n3",
+                "-tC:\\Users\\Remy\\Documents\\spring2021\\ling472\\LING472_project\\data\\austen-test.txt"
+                //"-tC:\\Users\\Remy\\Documents\\spring2021\\ling472\\LING472_project\\data\\toy-test.txt"
+                
+            ]
+        }
+    ]
+}

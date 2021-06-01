@@ -41,8 +41,8 @@ class LanguageModel:
 
         # print stuff to check it's equal to other unigrams
         unigram_probs_sorted = dict(sorted(LanguageModel.unigram_probs.items(), key=lambda x: (-x[1], x[0])))
-        #for key in unigram_probs_sorted:
-        #    print("{} {}".format(key, round(unigram_probs_sorted[key], 3)))
+        for key in unigram_probs_sorted:
+            print("{} {}".format(key, round(unigram_probs_sorted[key], 3)))
         print()
         print()
 
@@ -72,8 +72,8 @@ class LanguageModel:
         # print stuff for general clarity and checking against our other bigram model
         bigram_probs_sorted = dict(sorted(LanguageModel.bigram_probs.items(), key = lambda x: (-x[1], x[0])))
 
-       # for key in bigram_probs_sorted:
-       #     print("{} {}".format(key, round(bigram_probs_sorted[key], 3)))
+        for key in bigram_probs_sorted:
+            print("{} {}".format(key, round(bigram_probs_sorted[key], 3)))
 
         print()
         print()
@@ -101,8 +101,8 @@ class LanguageModel:
         trigram_probs_sorted = dict(sorted(LanguageModel.trigram_probs.items(), key = lambda x: (-x[1], x[0])))
 
         #output the sorted probabilites
-        #for key in trigram_probs_sorted:
-        #    print("{} {}".format(key, round(trigram_probs_sorted[key], 3)))
+        for key in trigram_probs_sorted:
+            print("{} {}".format(key, round(trigram_probs_sorted[key], 3)))
           
         
 
@@ -150,8 +150,8 @@ class LanguageModel:
                 else:
                     # improv solution for calculating unigram prob for end sentence token
                     if test_sentences[i][j] == "</s>":
-                        sen_prob += math.log(0.16,2) + math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
-                        prob_cum_sum += math.log(0.16,2) + math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
+                        sen_prob += + math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
+                        prob_cum_sum += math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
                     # general case
                     else:
                         sen_prob += math.log(0.16, 2) + LanguageModel.unigram_probs[test_sentences[i][j]]
