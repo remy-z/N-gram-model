@@ -88,8 +88,8 @@ class LanguageModel:
         LanguageModel.bigram_counts = general.BiCounter(train_sentences)
         LanguageModel.trigram_counts = general.TriCounter(train_sentences)
 
-        # substract both <s> tags
-        LanguageModel.vocab_size = len(LanguageModel.trigram_counts) - 2
+        # substract <s> tag
+        LanguageModel.vocab_size = len(LanguageModel.trigram_counts) - 1
 
         for k in LanguageModel.trigram_counts:
             for nk in LanguageModel.trigram_counts[k]:
