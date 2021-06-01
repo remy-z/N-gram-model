@@ -15,6 +15,7 @@ class LanguageModel:
     unigram_probs = {}
     trigram_counts = {}
     trigram_probs = {}
+    total_tokens = 0
 
     def train(self, train_corpus):
         
@@ -30,19 +31,19 @@ class LanguageModel:
         # exclude <s> from vocab size
         LanguageModel.vocab_size = len(LanguageModel.unigram_counts)
 
-        total_tokens = len([i for x in train_sentences for i in x])  # this is our N for unigrams
+        LanguageModel.total_tokens = len([i for x in train_sentences for i in x])  # this is our N for unigrams
 
         # calculate unigram probabilities
         for key in LanguageModel.unigram_counts:
             probability = math.log(
-                ((LanguageModel.unigram_counts[key] + 1) / (total_tokens + LanguageModel.vocab_size)), 2)
+                ((LanguageModel.unigram_counts[key]) / LanguageModel.total_tokens), 2)
             # probability = round(probability, 3)
             LanguageModel.unigram_probs.update({key: probability})
 
         # print stuff to check it's equal to other unigrams
         unigram_probs_sorted = dict(sorted(LanguageModel.unigram_probs.items(), key=lambda x: (-x[1], x[0])))
-        for key in unigram_probs_sorted:
-            print("{} {}".format(key, round(unigram_probs_sorted[key], 3)))
+        #for key in unigram_probs_sorted:
+        #    print("{} {}".format(key, round(unigram_probs_sorted[key], 3)))
         print()
         print()
 
@@ -64,16 +65,16 @@ class LanguageModel:
         # determine probabilities using log calculation
         for k in LanguageModel.bigram_counts:
             for nk in LanguageModel.bigram_counts[k]:
-                probability = math.log(((LanguageModel.bigram_counts[k][nk] + 1) / (
-                            LanguageModel.unigram_counts[nk] + LanguageModel.vocab_size)), 2)
+                probability = math.log(((LanguageModel.bigram_counts[k][nk]) / (
+                            LanguageModel.unigram_counts[nk])), 2)
                 # probability = round(probability, 3)
                 LanguageModel.bigram_probs.update({"{} {}".format(nk, k): probability})
 
         # print stuff for general clarity and checking against our other bigram model
         bigram_probs_sorted = dict(sorted(LanguageModel.bigram_probs.items(), key = lambda x: (-x[1], x[0])))
 
-        for key in bigram_probs_sorted:
-            print("{} {}".format(key, round(bigram_probs_sorted[key], 3)))
+        #for key in bigram_probs_sorted:
+        #    print("{} {}".format(key, round(bigram_probs_sorted[key], 3)))
 
         print()
         print()
@@ -93,7 +94,7 @@ class LanguageModel:
 
         for k in LanguageModel.trigram_counts:
             for nk in LanguageModel.trigram_counts[k]:
-                probability = math.log( ((LanguageModel.trigram_counts[k][nk] + 1) / (LanguageModel.bigram_counts[nk[1]][nk[0]] + LanguageModel.vocab_size)), 2)
+                probability = math.log( ((LanguageModel.trigram_counts[k][nk]) / (LanguageModel.bigram_counts[nk[1]][nk[0]])), 2)
                 #probability = round(probability, 3)
                 LanguageModel.trigram_probs.update({"{} {} {}".format(nk[0], nk[1], k): probability})
         
@@ -101,8 +102,8 @@ class LanguageModel:
         trigram_probs_sorted = dict(sorted(LanguageModel.trigram_probs.items(), key = lambda x: (-x[1], x[0])))
 
         #output the sorted probabilites
-        for key in trigram_probs_sorted:
-            print("{} {}".format(key, round(trigram_probs_sorted[key], 3)))
+        #for key in trigram_probs_sorted:
+        #    print("{} {}".format(key, round(trigram_probs_sorted[key], 3)))
           
         
 
@@ -150,7 +151,7 @@ class LanguageModel:
                 else:
                     # improv solution for calculating unigram prob for end sentence token
                     if test_sentences[i][j] == "</s>":
-                        sen_prob += + math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
+                        sen_prob += + math.log(LanguageModel.unigram_counts["</s>"] / (LanguageModel.unigram_counts["</s>"] + LanguageModel.unigram_counts["<s>"] + LanguageModel.total_tokens), 2)
                         prob_cum_sum += math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
                     # general case
                     else:
