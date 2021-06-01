@@ -88,7 +88,7 @@ class LanguageModel:
         LanguageModel.bigram_counts = general.BiCounter(train_sentences)
         LanguageModel.trigram_counts = general.TriCounter(train_sentences)
 
-        # vocab size excluding <s>
+        # substract <s> tag
         LanguageModel.vocab_size = len(LanguageModel.trigram_counts) - 1
 
         for k in LanguageModel.trigram_counts:
@@ -154,8 +154,8 @@ class LanguageModel:
                         prob_cum_sum += math.log(0.16,2) + math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
                     # general case
                     else:
-                        sen_prob += math.log(0.16,2) + LanguageModel.unigram_probs[test_sentences[i][j]]
-                        prob_cum_sum += math.log(0.16,2) + LanguageModel.unigram_probs[test_sentences[i][j]]
+                        sen_prob += math.log(0.16, 2) + LanguageModel.unigram_probs[test_sentences[i][j]]
+                        prob_cum_sum += math.log(0.16, 2) + LanguageModel.unigram_probs[test_sentences[i][j]]
                     # print("Sadge: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
                     # print("    " + test_sentences[i][j])
                     unigrams += 1
