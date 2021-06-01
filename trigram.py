@@ -11,6 +11,8 @@ class LanguageModel:
     vocab_size = 0
     unigram_counts = {}
     bigram_counts = {}
+    bigram_probs = {}
+    unigram_probs = {}
     trigram_counts = {}
     trigram_probs = {}
 
@@ -21,26 +23,76 @@ class LanguageModel:
 
         # UNK the tokenized sentences
         general.Unker(train_sentences)
-        
-        # Add <s> and </s> tags 
-        for i in range(len(train_sentences)):            
-            train_sentences[i].insert(0,'<s>')
-            train_sentences[i].insert(0,'<s>')
-            train_sentences[i].append('</s>')
-        
+
+        # count unigrams
         LanguageModel.unigram_counts = general.UniCounter(train_sentences)
 
-        LanguageModel.bigram_counts = general.BiCounter(train_sentences)
-        
-        LanguageModel.trigram_counts = general.TriCounter(train_sentences)
-            
         # exclude <s> from vocab size
+        LanguageModel.vocab_size = len(LanguageModel.unigram_counts)
+
+        total_tokens = len([i for x in train_sentences for i in x])  # this is our N for unigrams
+
+        # calculate unigram probabilities
+        for key in LanguageModel.unigram_counts:
+            probability = math.log(
+                ((LanguageModel.unigram_counts[key] + 1) / (total_tokens + LanguageModel.vocab_size)), 2)
+            # probability = round(probability, 3)
+            LanguageModel.unigram_probs.update({key: probability})
+
+        # print stuff to check it's equal to other unigrams
+        unigram_probs_sorted = dict(sorted(LanguageModel.unigram_probs.items(), key=lambda x: (-x[1], x[0])))
+        for key in unigram_probs_sorted:
+            print("{} {}".format(key, round(unigram_probs_sorted[key], 3)))
+        print()
+        print()
+
+
+        # Add <s> and </s> tags for bigrams
+        for i in range(len(train_sentences)):
+            train_sentences[i].insert(0, '<s>')
+            train_sentences[i].append('</s>')
+
+        # recount unigrams for bigrams since we have sentence tags
+        LanguageModel.unigram_counts = general.UniCounter(train_sentences)
+
+        # count bigrams
+        LanguageModel.bigram_counts = general.BiCounter(train_sentences)
+
+        # get vocab size without counting <s>
         LanguageModel.vocab_size = len(LanguageModel.unigram_counts) - 1
 
-        for k in LanguageModel.trigram_counts:
+        # determine probabilities using log calculation
+        for k in LanguageModel.bigram_counts:
+            for nk in LanguageModel.bigram_counts[k]:
+                probability = math.log(((LanguageModel.bigram_counts[k][nk] + 1) / (
+                            LanguageModel.unigram_counts[nk] + LanguageModel.vocab_size)), 2)
+                # probability = round(probability, 3)
+                LanguageModel.bigram_probs.update({"{} {}".format(nk, k): probability})
 
+        # print stuff for general clarity and checking against our other bigram model
+        bigram_probs_sorted = dict(sorted(LanguageModel.bigram_probs.items(), key = lambda x: (-x[1], x[0])))
+
+        for key in bigram_probs_sorted:
+            print("{} {}".format(key, round(bigram_probs_sorted[key], 3)))
+
+        print()
+        print()
+
+
+        # insert <s> for trigram counting
+        for i in range(len(train_sentences)):
+            train_sentences[i].insert(0, '<s>')
+
+        # recount unigram and bigram and count trigram
+        LanguageModel.unigram_counts = general.UniCounter(train_sentences)
+        LanguageModel.bigram_counts = general.BiCounter(train_sentences)
+        LanguageModel.trigram_counts = general.TriCounter(train_sentences)
+
+        # substract both <s> tags
+        LanguageModel.vocab_size = len(LanguageModel.trigram_counts) - 2
+
+        for k in LanguageModel.trigram_counts:
             for nk in LanguageModel.trigram_counts[k]:
-                
                 probability = math.log( ((LanguageModel.trigram_counts[k][nk] + 1) / (LanguageModel.bigram_counts[nk[1]][nk[0]] + LanguageModel.vocab_size)), 2)
                 #probability = round(probability, 3)
                 LanguageModel.trigram_probs.update({"{} {} {}".format(nk[0], nk[1], k): probability})
@@ -55,4 +107,69 @@ class LanguageModel:
         
 
     def score(self, test_corpus):
-        print('I am an unimplemented TRIGRAM score() method.')  # delete this!
+
+        # count type of ngram for sanity
+        unigrams = 0
+        bigrams = 0
+        trigrams = 0
+
+        # process test_corpus
+        test_sentence_strings = general.Opener(test_corpus)
+        test_sentences = general.Tokenizer(test_sentence_strings)
+        general.Unker(test_sentences, LanguageModel.unigram_counts)
+
+        # insert 2 sentence tags for trigram and </s>
+        for i in range(0, len(test_sentences)):
+            test_sentences[i].insert(0, '<s>')
+            test_sentences[i].insert(0, '<s>')
+            test_sentences[i].append('</s>')
+
+        prob_cum_sum = 0
+        word_count = 0
+        list_of_probs = []
+
+        for i in range(0, len(test_sentences)):
+            sen_prob = 0
+            for j in range(2, len(test_sentences[i])):
+                word_count += 1
+                # stupid backoff implementation using unigram, bigram and trigram probabilities
+                # If we have n-2, n-1, n trigram use that probability
+                if "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]) in LanguageModel.trigram_probs:
+                    sen_prob += LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
+                    prob_cum_sum += LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
+                    # print("In trigram probs: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
+                    unigrams += 1
+                # if we don't have that trigram, check for n-1, n bigram
+                elif "{} {}".format(test_sentences[i][j-1], test_sentences[i][j]) in LanguageModel.bigram_probs:
+                    sen_prob += math.log(0.4, 2) + LanguageModel.bigram_probs["{} {}".format(test_sentences[i][j-1], test_sentences[i][j])]
+                    prob_cum_sum += math.log(0.4, 2) + LanguageModel.bigram_probs["{} {}".format(test_sentences[i][j-1], test_sentences[i][j])]
+                    # print("In bigram probs: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
+                    # print("    " + "{} {}".format(test_sentences[i][j-1], test_sentences[i][j]))
+                    bigrams += 1
+                # unseen trigram and bigram so just do unigram calc
+                else:
+                    # improv solution for calculating unigram prob for end sentence token
+                    if test_sentences[i][j] == "</s>":
+                        sen_prob += + math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
+                        prob_cum_sum += math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
+                    # general case
+                    else:
+                        sen_prob += LanguageModel.unigram_probs[test_sentences[i][j]]
+                        prob_cum_sum += LanguageModel.unigram_probs[test_sentences[i][j]]
+                    # print("Sadge: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
+                    # print("    " + test_sentences[i][j])
+                    trigrams += 1
+            list_of_probs.append(round(sen_prob, 3))
+        sentences_and_probs = list(zip(test_sentence_strings, list_of_probs))
+
+        h = (-1 / word_count) * (prob_cum_sum)
+        perplexity = round(math.pow(2, h), 3)
+
+        sentences_and_probs.append(("perplexity: ", perplexity))
+
+        for i in range(len(sentences_and_probs)):
+            print("{} {}".format(sentences_and_probs[i][0], sentences_and_probs[i][1]))
+
+        print("Unigrams: " + str(unigrams))
+        print("Bigrams: " + str(bigrams))
+        print("Trigrams: " + str(trigrams))
