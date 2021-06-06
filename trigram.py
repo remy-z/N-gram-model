@@ -1,6 +1,7 @@
 # !/usr/bin/python3
 import math
 import general
+import random 
 
 # TODO: Implement a Laplace-smoothed trigram model :)
 class LanguageModel:
@@ -23,7 +24,7 @@ class LanguageModel:
         train_sentences = general.Tokenizer(general.Opener(train_corpus))
 
         # UNK the tokenized sentences
-        general.Unker(train_sentences)
+        #general.Unker(train_sentences)
 
         # count unigrams
         LanguageModel.unigram_counts = general.UniCounter(train_sentences)
@@ -177,3 +178,34 @@ class LanguageModel:
         print("Bigrams: " + str(bigrams))
         print("Trigrams: " + str(trigrams))
         print("unseen </s>: " + str(unseen_end))
+
+    def shannon(self):
+        shannon_list = []
+        for key in LanguageModel.trigram_probs:
+            trigram_prob = (key.split(), math.pow(2,LanguageModel.trigram_probs[key]))
+            if "<UNK>" not in trigram_prob[0]:
+                shannon_list.append(trigram_prob)
+
+        print("Shannon Visualization using trigram: ")
+        for i in range(10):
+            end_sentence = False
+            viz = ""
+            last_bigram = ("<s>","<s>")
+            
+            while not end_sentence: 
+                current_word = []
+                current_prob = []
+                
+                for item in shannon_list:
+                    if (item[0][0],item[0][1]) == last_bigram:
+                        current_word.append((item[0][2]))
+                        current_prob.append(item[1])
+            
+                choice = random.choices(current_word, current_prob, k=1)
+                if choice[0] == "</s>":
+                    end_sentence = True
+                else:
+                    last_bigram = (last_bigram[1],choice[0])
+                    viz += f"{choice[0]} "
+                
+            print(viz)

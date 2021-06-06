@@ -70,8 +70,8 @@ def main():
         
     print()
 
-    if args.test_corpus: 
-        lm.shannon()
+    
+    lm.shannon()
 
 
 if __name__ == '__main__':
