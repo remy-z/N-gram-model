@@ -160,11 +160,15 @@ class LanguageModel:
         #print("unseen </s>: " + str(unseen_end))
 
     def shannon(self, how_many):
-        shannon_list = []
+        shannon_dict = {}
+        
         for key in LanguageModel.trigram_probs:
-            trigram_prob = (key.split(), math.pow(2,LanguageModel.trigram_probs[key]))
-            if "<UNK>" not in trigram_prob[0]:
-                shannon_list.append(trigram_prob)
+            trigram = key.split()
+            if "<UNK>" not in key:
+                if (trigram[0], trigram[1]) not in shannon_dict:
+                    shannon_dict.update({(trigram[0], trigram[1]) : {trigram[2]: math.pow(2,LanguageModel.trigram_probs[key])}})
+                else:
+                    shannon_dict[(trigram[0], trigram[1])].update({trigram[2]: math.pow(2,LanguageModel.trigram_probs[key])})
 
         print("Shannon Visualization using trigram probabilites: ")
         for i in range(how_many):
@@ -174,11 +178,9 @@ class LanguageModel:
             while not end_sentence: 
                 current_word = []
                 current_prob = []
-                
-                for trigram in shannon_list:
-                    if (trigram[0][0],trigram[0][1]) == last_bigram:
-                        current_word.append((trigram[0][2]))
-                        current_prob.append(trigram[1])
+                items = shannon_dict[last_bigram].items()
+                for item in items:
+                    current_word.append(item[0]), current_prob.append(item[1])
 
                 #temp fix to get around bigrams that only ever had <UNK> appear after it 
                 if len(current_word) > 0:
