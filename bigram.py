@@ -13,7 +13,7 @@ class LanguageModel:
     bigram_counts = {}
     bigram_probs = {}
 
-    def train(self, train_corpus, output = True):
+    def train(self, train_corpus):
         
         # Opens train_corpus and save it as a list of lists
         train_sentences = general.Tokenizer(general.Opener(train_corpus))
@@ -37,16 +37,19 @@ class LanguageModel:
                 probability = math.log( ((LanguageModel.bigram_counts[k][nk] + 1) / (LanguageModel.unigram_counts[nk] + LanguageModel.vocab_size)), 2)
                 #probability = round(probability, 3)
                 LanguageModel.bigram_probs.update({"{} {}".format(nk,k): probability})
+        bigram_probs_sorted = dict(sorted(LanguageModel.bigram_probs.items(), key = lambda x: (-x[1], x[0])))
         
-        if output:
-            bigram_probs_sorted = dict(sorted(LanguageModel.bigram_probs.items(), key = lambda x: (-x[1], x[0])))
-            for key in bigram_probs_sorted:
-                print("{} {}".format(key, round(bigram_probs_sorted[key], 3)))
+        output_this = ""
+        for key in bigram_probs_sorted:
+            output_this += f"{key} {round(bigram_probs_sorted[key], 3)} \n"
+        print("Bigram probabilites: ")
+        print(output_this)
+
           
 
 
 
-    def score(self, test_corpus, output = True):
+    def score(self, test_corpus):
         
         # open test_corpus and save as a list of sentences 
         test_sentence_strings = general.Opener(test_corpus) 
@@ -90,10 +93,13 @@ class LanguageModel:
         h = (-1 / word_count) * (prob_cum_sum)
         perplexity = round(math.pow(2,h), 3)
         
-        if output:
-            for i in range(len(sentences_and_probs)):
-                print("{}  {}".format(sentences_and_probs[i][0], round(sentences_and_probs[i][1],3)))
         
+        output_this = ""
+        for tuple in sentences_and_probs:
+            output_this += f"{tuple[0]} {round(tuple[1], 3)} \n"
+        print("Test sentence probabilites:")
+        print(output_this)
+        print()
         print("Bigram Perplexity, Laplace Smoothing: " + str(perplexity))
         #print("unseen: " + str(unseen))
         #print("seen: " + str(seen))
@@ -116,7 +122,8 @@ class LanguageModel:
         for i in range(how_many):
             end_sentence = False
             last_word = "<s>"
-            
+            viz = ""
+
             while not end_sentence: 
                 current_word = []
                 current_prob = []
@@ -124,15 +131,12 @@ class LanguageModel:
                 for item in items:
                     current_word.append(item[0]), current_prob.append(item[1])
             
-            #temp fix to get around bigrams that only ever had <UNK> appear after it 
-                if len(current_word) > 0:
-                    choice = random.choices(current_word, current_prob, k=1)
-                    if choice[0] == "</s>":
-                        end_sentence = True
-                        print()
-                    else:
-                        last_word = choice[0]
-                        print(choice[0], end = " ")
-                else: 
+                choice = random.choices(current_word, current_prob, k=1)
+                if choice[0] == "</s>":
                     end_sentence = True
-                    print()  
+                else:
+                    last_word = choice[0]
+                    viz += f"{choice[0]} "
+            
+            print(viz)
+                

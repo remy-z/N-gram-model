@@ -3,9 +3,9 @@ import copy
 
 #open text and clean each line
 #create a list for which each index holds one line 
-def Opener(train_corpus):
+def Opener(corpus):
     list_of_sentences = []
-    with open(train_corpus, 'r', encoding = 'utf8') as f:
+    with open(corpus, 'r', encoding = 'utf8') as f:
         for line in f:
             line = re.sub(r'\n',"" , line) 
             list_of_sentences.append(line) 

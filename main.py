@@ -43,8 +43,6 @@ def main():
     parser.add_argument('-s', '--shannon', required = False, type= int,
                         help = 'number of Shannon Visualization sentences')
 
-    parser.add_argument('-p', '--output', default = 1, type=int,
-                        help = "don't output extra stuff")
 
     args = parser.parse_args()
 
@@ -62,15 +60,17 @@ def main():
     lm = LanguageModel()
 
     # train the language model
-    lm.train(args.train_corpus, output = args.output)
+    lm.train(args.train_corpus)
     print()
     
     # evaluates the language model
-    lm.score(args.test_corpus, output = args.output)   
+    lm.score(args.test_corpus)   
     print()
 
     if args.shannon and args.ngram != 1:
         lm.shannon(args.shannon)
+    elif args.shannon and args.ngram == 1:
+        print("No Shannon Visualization for Unigram")
 
 
 if __name__ == '__main__':

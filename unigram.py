@@ -11,7 +11,7 @@ class LanguageModel:
     unigram_counts = {}
     unigram_probs = {}
 
-    def train(self, train_corpus, output = True):
+    def train(self, train_corpus):
            
         # Opens train_corpus and save it as a list of lists
         train_sentences = general.Tokenizer(general.Opener(train_corpus))
@@ -22,20 +22,22 @@ class LanguageModel:
         LanguageModel.vocab_size = len(LanguageModel.unigram_counts)                       
         total_tokens = len([i for x in train_sentences for i in x]) # this is our N for unigrams
         
-        for key in LanguageModel.unigram_counts:
-            
+        for key in LanguageModel.unigram_counts:   
             probability = math.log(((LanguageModel.unigram_counts[key] + 1) / (total_tokens + LanguageModel.vocab_size)), 2)
             #probability = round(probability, 3)
             LanguageModel.unigram_probs.update({key: probability})
         
-        if output:
-            unigram_probs_sorted = dict(sorted(LanguageModel.unigram_probs.items(), key = lambda x: (-x[1], x[0])))
-            for key in unigram_probs_sorted:
-                print("{} {}".format(key, round(unigram_probs_sorted[key], 3)))
+        unigram_probs_sorted = dict(sorted(LanguageModel.unigram_probs.items(), key = lambda x: (-x[1], x[0])))
+        
+        output_this = ""
+        for key in unigram_probs_sorted:
+            output_this += f"{key} {round(unigram_probs_sorted[key], 3)} \n"
+        print("Unigram probabilites:")
+        print(output_this)
 
 
 
-    def score(self, test_corpus, output = True):    
+    def score(self, test_corpus):    
         
         # Open test_corpus and save as a list of sentences 
         test_sentence_strings = general.Opener(test_corpus) 
@@ -68,7 +70,11 @@ class LanguageModel:
         h = (-1 / word_count) * (prob_cum_sum)
         perplexity = round(math.pow(2,h), 3)
         
-        if output:
-            for i in range(len(sentences_and_probs)):
-                print("{}  {}".format(sentences_and_probs[i][0],round(sentences_and_probs[i][1], 3)))
+        
+        output_this = ""
+        for tuple in sentences_and_probs:
+            output_this += f"{tuple[0]} {round(tuple[1], 3)} \n"
+        print("Test sentence probabilites:")
+        print(output_this)
+        print()
         print("Unigram Perplexity, Laplace Smoothing: " + str(perplexity))
