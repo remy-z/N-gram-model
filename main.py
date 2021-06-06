@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from bigram import LanguageModel as BigramModel
 from trigram import LanguageModel as TrigramModel
 from unigram import LanguageModel as UnigramModel
+from interpolation import LanguageModel as InterpTriModel
 
 def main():
     '''
@@ -48,6 +49,9 @@ def main():
 
     elif args.ngram == 3:
         LanguageModel = TrigramModel
+    
+    elif args.ngram == 4:
+        LanguageModel = InterpTriModel
 
     else:
         LanguageModel = UnigramModel
@@ -65,6 +69,9 @@ def main():
         lm.score(args.test_corpus)
         
     print()
+
+    if args.test_corpus: 
+        lm.shannon()
 
 
 if __name__ == '__main__':

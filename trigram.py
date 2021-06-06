@@ -113,6 +113,7 @@ class LanguageModel:
         unigrams = 0
         bigrams = 0
         trigrams = 0
+        unseen_end = 0
 
         # process test_corpus
         test_sentence_strings = general.Opener(test_corpus)
@@ -151,8 +152,9 @@ class LanguageModel:
                 else:
                     # improv solution for calculating unigram prob for end sentence token
                     if test_sentences[i][j] == "</s>":
-                        sen_prob += + math.log(LanguageModel.unigram_counts["</s>"] / (LanguageModel.unigram_counts["</s>"] + LanguageModel.unigram_counts["<s>"] + LanguageModel.total_tokens), 2)
-                        prob_cum_sum += math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
+                        sen_prob += math.log(0.16, 2) + math.log(LanguageModel.unigram_counts["</s>"] / (LanguageModel.unigram_counts["</s>"] + LanguageModel.unigram_counts["<s>"] + LanguageModel.total_tokens), 2)
+                        prob_cum_sum += math.log(0.16, 2) + math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
+                        unseen_end +=1
                     # general case
                     else:
                         sen_prob += math.log(0.16, 2) + LanguageModel.unigram_probs[test_sentences[i][j]]
@@ -160,7 +162,7 @@ class LanguageModel:
                     # print("Sadge: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
                     # print("    " + test_sentences[i][j])
                     unigrams += 1
-            list_of_probs.append(round(sen_prob, 3))
+            list_of_probs.append(sen_prob)
         sentences_and_probs = list(zip(test_sentence_strings, list_of_probs))
 
         h = (-1 / word_count) * (prob_cum_sum)
@@ -174,3 +176,4 @@ class LanguageModel:
         print("Unigrams: " + str(unigrams))
         print("Bigrams: " + str(bigrams))
         print("Trigrams: " + str(trigrams))
+        print("unseen </s>: " + str(unseen_end))

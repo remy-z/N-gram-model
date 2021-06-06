@@ -63,7 +63,7 @@ class LanguageModel:
                 sen_prob += LanguageModel.unigram_probs[test_sentences[i][j]]
                 prob_cum_sum += LanguageModel.unigram_probs[test_sentences[i][j]]
             
-            list_of_probs.append(round(sen_prob,3))
+            list_of_probs.append(sen_prob,3)
         
         # make a list of sentences and their corresponding probabilities to return 
         sentences_and_probs = list(zip(test_sentence_strings, list_of_probs))
