@@ -17,8 +17,10 @@ class LanguageModel:
     trigram_counts = {}
     trigram_probs = {}
     total_tokens = 0
+    train_corpus = ""
+
     def train(self, train_corpus):
-        
+        LanguageModel.train_corpus = train_corpus
         # Opens train_corpus and save it as a list of lists
         train_sentences = general.Tokenizer(general.Opener(train_corpus))
         # UNK the tokenized sentences
@@ -82,9 +84,6 @@ class LanguageModel:
             output_this += f"{key} {round(trigram_probs_sorted[key], 3)} \n"
         print("Trigram probabilites: ")
         print(output_this)
-
-          
-        
 
     def score(self, test_corpus):
 
@@ -161,16 +160,23 @@ class LanguageModel:
         #print("unseen </s>: " + str(unseen_end))
 
     def shannon(self, how_many):
-        shannon_dict = {}
         
-        for key in LanguageModel.trigram_probs:
-            trigram = key.split()
-            #for now just include UNK
-            #if "<UNK>" not in key:
-            if (trigram[0], trigram[1]) not in shannon_dict:
-                shannon_dict.update({(trigram[0], trigram[1]) : {trigram[2]: math.pow(2,LanguageModel.trigram_probs[key])}})
-            else:
-                shannon_dict[(trigram[0], trigram[1])].update({trigram[2]: math.pow(2,LanguageModel.trigram_probs[key])})
+        #get trigram without UNKS
+        train_sentences = general.Tokenizer(general.Opener(LanguageModel.train_corpus))
+        for i in range(len(train_sentences)):
+            train_sentences[i].insert(0, '<s>')
+            train_sentences[i].insert(0, '<s>')
+            train_sentences[i].append('</s>')
+        shannon_bicount = general.BiCounter(train_sentences)  
+        shannon_tricount = general.TriCounter(train_sentences)
+        shannon_probs = {}
+        for k in shannon_tricount:
+            for nk in shannon_tricount[k]:
+                probability = ((shannon_tricount[k][nk]) / (shannon_bicount[nk[1]][nk[0]]))
+                if (nk[0], nk[1]) not in shannon_probs:
+                    shannon_probs.update({(nk[0], nk[1]) : {k:probability}})
+                else:
+                    shannon_probs[(nk[0], nk[1])].update( {k:probability})
 
         print("Shannon Visualization using trigram probabilites: ")
         for i in range(how_many):
@@ -180,7 +186,7 @@ class LanguageModel:
             while not end_sentence: 
                 current_word = []
                 current_prob = []
-                items = shannon_dict[last_bigram].items()
+                items = shannon_probs[last_bigram].items()
                 for item in items:
                     current_word.append(item[0]), current_prob.append(item[1])
 
