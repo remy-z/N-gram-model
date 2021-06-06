@@ -4,7 +4,6 @@ from argparse import ArgumentParser
 from bigram import LanguageModel as BigramModel
 from trigram import LanguageModel as TrigramModel
 from unigram import LanguageModel as UnigramModel
-from interpolation import LanguageModel as InterpTriModel
 
 def main():
     '''
@@ -40,6 +39,12 @@ def main():
 
     parser.add_argument('-n', '--ngram', default=1, type=int,
                         help='the order of n-gram')
+    
+    parser.add_argument('-s', '--shannon', required = False, type= int,
+                        help = 'number of Shannon Visualization sentences')
+
+    parser.add_argument('-p', '--output', default = 1, type=int,
+                        help = "don't output extra stuff")
 
     args = parser.parse_args()
 
@@ -49,9 +54,6 @@ def main():
 
     elif args.ngram == 3:
         LanguageModel = TrigramModel
-    
-    elif args.ngram == 4:
-        LanguageModel = InterpTriModel
 
     else:
         LanguageModel = UnigramModel
@@ -60,18 +62,15 @@ def main():
     lm = LanguageModel()
 
     # train the language model
-    print()
-    lm.train(args.train_corpus)  
+    lm.train(args.train_corpus, output = args.output)
     print()
     
     # evaluates the language model
-    if args.test_corpus: 
-        lm.score(args.test_corpus)
-        
+    lm.score(args.test_corpus, output = args.output)   
     print()
 
-    
-    lm.shannon()
+    if args.shannon and args.ngram != 1:
+        lm.shannon(args.shannon)
 
 
 if __name__ == '__main__':

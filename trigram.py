@@ -18,20 +18,16 @@ class LanguageModel:
     trigram_probs = {}
     total_tokens = 0
 
-    def train(self, train_corpus):
+    def train(self, train_corpus, output = True):
         
         # Opens train_corpus and save it as a list of lists
         train_sentences = general.Tokenizer(general.Opener(train_corpus))
-
         # UNK the tokenized sentences
-        #general.Unker(train_sentences)
-
+        general.Unker(train_sentences)
         # count unigrams
         LanguageModel.unigram_counts = general.UniCounter(train_sentences)
-
         # exclude <s> from vocab size
         LanguageModel.vocab_size = len(LanguageModel.unigram_counts)
-
         LanguageModel.total_tokens = len([i for x in train_sentences for i in x])  # this is our N for unigrams
 
         # calculate unigram probabilities
@@ -39,15 +35,7 @@ class LanguageModel:
             probability = math.log(
                 ((LanguageModel.unigram_counts[key]) / LanguageModel.total_tokens), 2)
             # probability = round(probability, 3)
-            LanguageModel.unigram_probs.update({key: probability})
-
-        # print stuff to check it's equal to other unigrams
-        unigram_probs_sorted = dict(sorted(LanguageModel.unigram_probs.items(), key=lambda x: (-x[1], x[0])))
-        #for key in unigram_probs_sorted:
-        #    print("{} {}".format(key, round(unigram_probs_sorted[key], 3)))
-        print()
-        print()
-
+            LanguageModel.unigram_probs.update({key: probability})    
 
         # Add <s> and </s> tags for bigrams
         for i in range(len(train_sentences)):
@@ -71,16 +59,6 @@ class LanguageModel:
                 # probability = round(probability, 3)
                 LanguageModel.bigram_probs.update({"{} {}".format(nk, k): probability})
 
-        # print stuff for general clarity and checking against our other bigram model
-        bigram_probs_sorted = dict(sorted(LanguageModel.bigram_probs.items(), key = lambda x: (-x[1], x[0])))
-
-        #for key in bigram_probs_sorted:
-        #    print("{} {}".format(key, round(bigram_probs_sorted[key], 3)))
-
-        print()
-        print()
-
-
         # insert <s> for trigram counting
         for i in range(len(train_sentences)):
             train_sentences[i].insert(0, '<s>')
@@ -99,16 +77,17 @@ class LanguageModel:
                 #probability = round(probability, 3)
                 LanguageModel.trigram_probs.update({"{} {} {}".format(nk[0], nk[1], k): probability})
         
-        #sort the probabilites
-        trigram_probs_sorted = dict(sorted(LanguageModel.trigram_probs.items(), key = lambda x: (-x[1], x[0])))
-
-        #output the sorted probabilites
-        #for key in trigram_probs_sorted:
-        #    print("{} {}".format(key, round(trigram_probs_sorted[key], 3)))
+        if output:
+            #sort the probabilites
+            trigram_probs_sorted = dict(sorted(LanguageModel.trigram_probs.items(), key = lambda x: (-x[1], x[0])))
+            print('Trigram probabilites: ')
+            #output the sorted probabilites
+            for key in trigram_probs_sorted:
+                print("{} {}".format(key, round(trigram_probs_sorted[key], 3)))
           
         
 
-    def score(self, test_corpus):
+    def score(self, test_corpus, output = True):
 
         # count type of ngram for sanity
         unigrams = 0
@@ -164,48 +143,54 @@ class LanguageModel:
                     # print("    " + test_sentences[i][j])
                     unigrams += 1
             list_of_probs.append(sen_prob)
+
         sentences_and_probs = list(zip(test_sentence_strings, list_of_probs))
 
         h = (-1 / word_count) * (prob_cum_sum)
         perplexity = round(math.pow(2, h), 3)
 
-        sentences_and_probs.append(("perplexity: ", perplexity))
+        if output:
+            for i in range(len(sentences_and_probs)):
+                print("{} {}".format(sentences_and_probs[i][0], round(sentences_and_probs[i][1], 3)))
 
-        for i in range(len(sentences_and_probs)):
-            print("{} {}".format(sentences_and_probs[i][0], sentences_and_probs[i][1]))
+        print("Trigram Perplexity, Stupid backoff: " + str(perplexity))
+        #print("Unigrams: " + str(unigrams))
+        #print("Bigrams: " + str(bigrams))
+        #print("Trigrams: " + str(trigrams))
+        #print("unseen </s>: " + str(unseen_end))
 
-        print("Unigrams: " + str(unigrams))
-        print("Bigrams: " + str(bigrams))
-        print("Trigrams: " + str(trigrams))
-        print("unseen </s>: " + str(unseen_end))
-
-    def shannon(self):
+    def shannon(self, how_many):
         shannon_list = []
         for key in LanguageModel.trigram_probs:
             trigram_prob = (key.split(), math.pow(2,LanguageModel.trigram_probs[key]))
             if "<UNK>" not in trigram_prob[0]:
                 shannon_list.append(trigram_prob)
 
-        print("Shannon Visualization using trigram: ")
-        for i in range(10):
+        print("Shannon Visualization using trigram probabilites: ")
+        for i in range(how_many):
             end_sentence = False
-            viz = ""
             last_bigram = ("<s>","<s>")
             
             while not end_sentence: 
                 current_word = []
                 current_prob = []
                 
-                for item in shannon_list:
-                    if (item[0][0],item[0][1]) == last_bigram:
-                        current_word.append((item[0][2]))
-                        current_prob.append(item[1])
-            
-                choice = random.choices(current_word, current_prob, k=1)
-                if choice[0] == "</s>":
+                for trigram in shannon_list:
+                    if (trigram[0][0],trigram[0][1]) == last_bigram:
+                        current_word.append((trigram[0][2]))
+                        current_prob.append(trigram[1])
+
+                #temp fix to get around bigrams that only ever had <UNK> appear after it 
+                if len(current_word) > 0:
+                    choice = random.choices(current_word, current_prob, k=1)
+                    if choice[0] == "</s>":
+                        end_sentence = True
+                        print()
+                    else:
+                        last_bigram = (last_bigram[1],choice[0])
+                        print(choice[0], end = " ")
+                else: 
                     end_sentence = True
-                else:
-                    last_bigram = (last_bigram[1],choice[0])
-                    viz += f"{choice[0]} "
+                    print()
+
                 
-            print(viz)
