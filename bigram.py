@@ -12,9 +12,10 @@ class LanguageModel:
     vocab_size = 0
     bigram_counts = {}
     bigram_probs = {}
+    train_corpus =""
 
     def train(self, train_corpus):
-        
+        LanguageModel.train_corpus = train_corpus
         # Opens train_corpus and save it as a list of lists
         train_sentences = general.Tokenizer(general.Opener(train_corpus))
         # UNK the tokenized sentences
@@ -31,9 +32,7 @@ class LanguageModel:
         LanguageModel.vocab_size = len(LanguageModel.unigram_counts) - 1       
 
         for k in LanguageModel.bigram_counts:
-
-            for nk in LanguageModel.bigram_counts[k]:
-                
+            for nk in LanguageModel.bigram_counts[k]:   
                 probability = math.log( ((LanguageModel.bigram_counts[k][nk] + 1) / (LanguageModel.unigram_counts[nk] + LanguageModel.vocab_size)), 2)
                 #probability = round(probability, 3)
                 LanguageModel.bigram_probs.update({"{} {}".format(nk,k): probability})
@@ -44,9 +43,6 @@ class LanguageModel:
             output_this += f"{key} {round(bigram_probs_sorted[key], 3)} \n"
         print("Bigram probabilites: ")
         print(output_this)
-
-          
-
 
 
     def score(self, test_corpus):
@@ -106,18 +102,22 @@ class LanguageModel:
         
     
     def shannon(self, how_many):
-        shannon_dict = {}
-        
-        for key in LanguageModel.bigram_probs:
-            bigram = key.split()
-            if "<UNK>" not in key:
-                if bigram[0] not in shannon_dict:
-                    shannon_dict.update({bigram[0] : {bigram[1]: math.pow(2,LanguageModel.bigram_probs[key])}})
+        #NO UNKS HERE
+        train_sentences = general.Tokenizer(general.Opener(LanguageModel.train_corpus))
+        for i in range(len(train_sentences)):            
+            train_sentences[i].insert(0,'<s>')
+            train_sentences[i].append('</s>')  
+        shannon_unicount = general.UniCounter(train_sentences)
+        shannon_bicount = general.BiCounter(train_sentences)
+        shannon_probs = {}
+        for k in shannon_bicount:
+            for nk in shannon_bicount[k]:   
+                probability = (shannon_bicount[k][nk] / shannon_unicount[nk])
+                if nk not in shannon_probs:
+                    shannon_probs.update({nk : {k: probability}})
                 else:
-                    shannon_dict[bigram[0]].update({bigram[1]: math.pow(2,LanguageModel.bigram_probs[key])})
-            
-
-
+                    shannon_probs[nk].update({k: probability})
+                
         print("Shannon Visualization using bigram probabilites: ")
         for i in range(how_many):
             end_sentence = False
@@ -127,7 +127,7 @@ class LanguageModel:
             while not end_sentence: 
                 current_word = []
                 current_prob = []
-                items = shannon_dict[last_word].items()
+                items = shannon_probs[last_word].items()
                 for item in items:
                     current_word.append(item[0]), current_prob.append(item[1])
             
