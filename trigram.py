@@ -129,15 +129,8 @@ class LanguageModel:
                     bigrams += 1
                 # unseen trigram and bigram so just do unigram calc
                 else:
-                    # improv solution for calculating unigram prob for end sentence token
-                    if test_sentences[i][j] == "</s>":
-                        sen_prob += math.log(0.16, 2) + math.log(LanguageModel.unigram_counts["</s>"] / (LanguageModel.unigram_counts["</s>"] + LanguageModel.unigram_counts["<s>"] + LanguageModel.total_tokens), 2)
-                        prob_cum_sum += math.log(0.16, 2) + math.log(1 / (len(LanguageModel.unigram_counts) - 1), 2)
-                        unseen_end +=1
-                    # general case
-                    else:
-                        sen_prob += math.log(0.16, 2) + LanguageModel.unigram_probs[test_sentences[i][j]]
-                        prob_cum_sum += math.log(0.16, 2) + LanguageModel.unigram_probs[test_sentences[i][j]]
+                    sen_prob += math.log(0.16, 2) + LanguageModel.unigram_probs[test_sentences[i][j]]
+                    prob_cum_sum += math.log(0.16, 2) + LanguageModel.unigram_probs[test_sentences[i][j]]
                     # print("Sadge: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
                     # print("    " + test_sentences[i][j])
                     unigrams += 1
