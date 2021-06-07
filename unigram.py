@@ -17,9 +17,14 @@ class LanguageModel:
         train_sentences = general.Tokenizer(general.Opener(train_corpus))
         # UNK the tokenized sentences
         general.Unker(train_sentences)
+        
+        for i in range(len(train_sentences)):            
+            train_sentences[i].append('</s>')  
+
         # calculate counts with the UNKed set
         LanguageModel.unigram_counts = general.UniCounter(train_sentences)
-        LanguageModel.vocab_size = len(LanguageModel.unigram_counts)                       
+        LanguageModel.vocab_size = len(LanguageModel.unigram_counts)  
+                            
         total_tokens = len([i for x in train_sentences for i in x]) # this is our N for unigrams
         
         for key in LanguageModel.unigram_counts:   

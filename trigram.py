@@ -26,6 +26,8 @@ class LanguageModel:
         # UNK the tokenized sentences
         general.Unker(train_sentences)
         # count unigrams
+        for i in range(len(train_sentences)):
+            train_sentences[i].append('</s>')
         LanguageModel.unigram_counts = general.UniCounter(train_sentences)
         # exclude <s> from vocab size
         LanguageModel.vocab_size = len(LanguageModel.unigram_counts)
@@ -41,7 +43,6 @@ class LanguageModel:
         # Add <s> and </s> tags for bigrams
         for i in range(len(train_sentences)):
             train_sentences[i].insert(0, '<s>')
-            train_sentences[i].append('</s>')
 
         # recount unigrams for bigrams since we have sentence tags
         LanguageModel.unigram_counts = general.UniCounter(train_sentences)

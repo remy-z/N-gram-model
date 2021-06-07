@@ -23,7 +23,7 @@ class LanguageModel:
         # Add <s> and </s> tags 
         for i in range(len(train_sentences)):            
             train_sentences[i].insert(0,'<s>')
-            train_sentences[i].append('</s>')  
+            train_sentences[i].append('</s>') 
         # Get Unigram counts that will be needed for calculating bigram probability
         LanguageModel.unigram_counts = general.UniCounter(train_sentences)
         #get a nested dictionary of bigram counts
@@ -63,8 +63,8 @@ class LanguageModel:
         prob_cum_sum = 0   # this is the sum of probabilities for every sentence
         word_count = 0     # this is our N for calculating perplexity
         list_of_probs = [] #keep track of -our probabilites 
-        #seen = 0 
-        #unseen = 0 
+        seen = 0
+        unseen = 0
         for i in range(0, len(test_sentences)):
 
             sen_prob = 0
@@ -74,11 +74,11 @@ class LanguageModel:
                 if "{} {}".format(test_sentences[i][j-1],test_sentences[i][j]) in LanguageModel.bigram_probs:  
                     sen_prob += LanguageModel.bigram_probs["{} {}".format(test_sentences[i][j-1],test_sentences[i][j])]
                     prob_cum_sum += LanguageModel.bigram_probs["{} {}".format(test_sentences[i][j-1],test_sentences[i][j])]
-                    #seen += 1
+                    seen += 1
                 else:
                     sen_prob += math.log( ((1) / (LanguageModel.unigram_counts[test_sentences[i][j-1]] + LanguageModel.vocab_size)), 2)
                     prob_cum_sum += math.log( ((1) / (LanguageModel.unigram_counts[test_sentences[i][j-1]] + LanguageModel.vocab_size)), 2)
-                    #unseen += 1
+                    unseen += 1
             list_of_probs.append(sen_prob)    
 
 
@@ -97,8 +97,8 @@ class LanguageModel:
         print(output_this)
         print()
         print("Bigram Perplexity, Laplace Smoothing: " + str(perplexity))
-        #print("unseen: " + str(unseen))
-        #print("seen: " + str(seen))
+        print("unseen: " + str(unseen))
+        print("seen: " + str(seen))
         
     
     def shannon(self, how_many):
