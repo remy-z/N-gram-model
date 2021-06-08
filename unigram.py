@@ -1,6 +1,7 @@
 # !/usr/bin/python3
 import math
 import general
+import random
 
 class LanguageModel:
 
@@ -48,6 +49,8 @@ class LanguageModel:
         test_sentence_strings = general.Opener(test_corpus) 
         # Turn sentences into list of lists
         test_sentences = general.Tokenizer(test_sentence_strings)
+        for i in range(len(test_sentences)):            
+            test_sentences[i].append('</s>')
         # UNK everything in the test set that doesn't appear in our vocabulary
         general.Unker(test_sentences, LanguageModel.unigram_counts)
 
