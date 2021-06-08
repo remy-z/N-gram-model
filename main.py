@@ -67,10 +67,8 @@ def main():
     lm.score(args.test_corpus)   
     print()
 
-    if args.shannon and args.ngram != 1:
+    if args.shannon:
         lm.shannon(args.shannon)
-    elif args.shannon and args.ngram == 1:
-        print("No Shannon Visualization for Unigram")
 
 
 if __name__ == '__main__':

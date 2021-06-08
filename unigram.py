@@ -86,3 +86,27 @@ class LanguageModel:
         print(output_this)
         print()
         print("Unigram Perplexity, Laplace Smoothing: " + str(perplexity))
+
+    def shannon(self, how_many):
+        
+        shannon_probs = LanguageModel.unigram_probs
+        
+        print("Shannon Visualization using unigram probabilites: ")
+
+        for i in range(how_many):
+            end_sentence = False
+            viz = ""
+            while not end_sentence: 
+                current_word = []
+                current_prob = []
+                items = shannon_probs.items()
+                for item in items:
+                    current_word.append(item[0]), current_prob.append(math.pow(2, item[1]))
+            
+                choice = random.choices(current_word, current_prob, k=1)
+
+                if choice[0] == "</s>":
+                    end_sentence = True
+                else:
+                    viz += f"{choice[0]} "   
+            print(viz)
