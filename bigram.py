@@ -34,7 +34,6 @@ class LanguageModel:
         for k in LanguageModel.bigram_counts:
             for nk in LanguageModel.bigram_counts[k]:   
                 probability = math.log( ((LanguageModel.bigram_counts[k][nk] + 1) / (LanguageModel.unigram_counts[nk] + LanguageModel.vocab_size)), 2)
-                #probability = round(probability, 3)
                 LanguageModel.bigram_probs.update({"{} {}".format(nk,k): probability})
         bigram_probs_sorted = dict(sorted(LanguageModel.bigram_probs.items(), key = lambda x: (-x[1], x[0])))
         
@@ -102,7 +101,7 @@ class LanguageModel:
         
     
     def shannon(self, how_many):
-        #NO UNKS HERE
+        #Get probabilites without UNKs
         train_sentences = general.Tokenizer(general.Opener(LanguageModel.train_corpus))
         for i in range(len(train_sentences)):            
             train_sentences[i].insert(0,'<s>')
@@ -117,8 +116,10 @@ class LanguageModel:
                     shannon_probs.update({nk : {k: probability}})
                 else:
                     shannon_probs[nk].update({k: probability})
-                
+
+        # With our probabilites, generate random sentences using the Shannon Visualization method        
         print("Shannon Visualization using bigram probabilites: ")
+        print("")
         for i in range(how_many):
             end_sentence = False
             last_word = "<s>"
@@ -138,5 +139,5 @@ class LanguageModel:
                     last_word = choice[0]
                     viz += f"{choice[0]} "
             
-            print(viz)
+            print(f'{i +1}) {viz}')
                 

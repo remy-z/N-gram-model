@@ -16,9 +16,9 @@ class LanguageModel:
            
         # Opens train_corpus and save it as a list of lists
         train_sentences = general.Tokenizer(general.Opener(train_corpus))
-        # UNK the tokenized sentences
-        general.Unker(train_sentences)
         
+        # UNK the tokenized sentences and add end sentence tag
+        general.Unker(train_sentences)
         for i in range(len(train_sentences)):            
             train_sentences[i].append('</s>')  
 
@@ -26,15 +26,15 @@ class LanguageModel:
         LanguageModel.unigram_counts = general.UniCounter(train_sentences)
         LanguageModel.vocab_size = len(LanguageModel.unigram_counts)  
                             
-        total_tokens = len([i for x in train_sentences for i in x]) # this is our N for unigrams
+        total_tokens = len([i for x in train_sentences for i in x]) # this is our N for unigram probability calculation
         
         for key in LanguageModel.unigram_counts:   
             probability = math.log(((LanguageModel.unigram_counts[key] + 1) / (total_tokens + LanguageModel.vocab_size)), 2)
-            #probability = round(probability, 3)
             LanguageModel.unigram_probs.update({key: probability})
         
         unigram_probs_sorted = dict(sorted(LanguageModel.unigram_probs.items(), key = lambda x: (-x[1], x[0])))
         
+        # output our results
         output_this = ""
         for key in unigram_probs_sorted:
             output_this += f"{key} {round(unigram_probs_sorted[key], 3)} \n"
@@ -60,7 +60,7 @@ class LanguageModel:
         
         for i in range(0, len(test_sentences)):
             
-            #keeps track of probability for each sentence
+            #keep track of probability for each sentence
             sen_prob = 0 
             
             for j in range(0, len(test_sentences[i])):
@@ -90,9 +90,9 @@ class LanguageModel:
     def shannon(self, how_many):
         
         shannon_probs = LanguageModel.unigram_probs
-        
+        # With our probabilites, generate random sentences using the Shannon Visualization method
         print("Shannon Visualization using unigram probabilites: ")
-
+        print("")
         for i in range(how_many):
             end_sentence = False
             viz = ""
@@ -109,4 +109,5 @@ class LanguageModel:
                     end_sentence = True
                 else:
                     viz += f"{choice[0]} "   
-            print(viz)
+            
+            print(f'{i +1}) {viz}')

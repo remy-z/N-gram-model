@@ -3,7 +3,6 @@ import math
 import general
 import random 
 
-# TODO: Implement a Laplace-smoothed trigram model :)
 class LanguageModel:
 
     def __init__(self):
@@ -26,11 +25,12 @@ class LanguageModel:
         # UNK the tokenized sentences
         general.Unker(train_sentences)
         # count unigrams
+        print("Calculating Unigram Probabilites...")
         for i in range(len(train_sentences)):
             train_sentences[i].append('</s>')
         LanguageModel.unigram_counts = general.UniCounter(train_sentences)
         # exclude <s> from vocab size
-        LanguageModel.vocab_size = len(LanguageModel.unigram_counts)
+        LanguageModel.vocab_size = len(LanguageModel.unigram_counts) - 1
         LanguageModel.total_tokens = len([i for x in train_sentences for i in x])  # this is our N for unigrams
 
         # calculate unigram probabilities
@@ -39,7 +39,8 @@ class LanguageModel:
                 ((LanguageModel.unigram_counts[key]) / LanguageModel.total_tokens), 2)
             # probability = round(probability, 3)
             LanguageModel.unigram_probs.update({key: probability})    
-
+        
+        print("Calculating Bigram Probabilites...")
         # Add <s> and </s> tags for bigrams
         for i in range(len(train_sentences)):
             train_sentences[i].insert(0, '<s>')
@@ -60,13 +61,13 @@ class LanguageModel:
                             LanguageModel.unigram_counts[nk])), 2)
                 # probability = round(probability, 3)
                 LanguageModel.bigram_probs.update({"{} {}".format(nk, k): probability})
-
+        
+        print("Calculating Trigram Probabilites...")
         # insert <s> for trigram counting
         for i in range(len(train_sentences)):
             train_sentences[i].insert(0, '<s>')
 
-        # recount unigram and bigram and count trigram
-        LanguageModel.unigram_counts = general.UniCounter(train_sentences)
+        # recount bigram and count trigram
         LanguageModel.bigram_counts = general.BiCounter(train_sentences)
         LanguageModel.trigram_counts = general.TriCounter(train_sentences)
 
@@ -76,9 +77,9 @@ class LanguageModel:
         for k in LanguageModel.trigram_counts:
             for nk in LanguageModel.trigram_counts[k]:
                 probability = math.log( ((LanguageModel.trigram_counts[k][nk]) / (LanguageModel.bigram_counts[nk[1]][nk[0]])), 2)
-                #probability = round(probability, 3)
                 LanguageModel.trigram_probs.update({"{} {} {}".format(nk[0], nk[1], k): probability})
-        #sort the probabilites
+        
+        #sort and output the probabilites
         trigram_probs_sorted = dict(sorted(LanguageModel.trigram_probs.items(), key = lambda x: (-x[1], x[0])))
         output_this = ""
         for key in trigram_probs_sorted:
@@ -88,18 +89,17 @@ class LanguageModel:
 
     def score(self, test_corpus):
 
-        # count type of ngram for sanity
-        unigrams = 0
-        bigrams = 0
-        trigrams = 0
-        unseen_end = 0
+        # count type of ngram for sanity COPIUM
+        # unigrams = 0
+        # bigrams = 0
+        # trigrams = 0
 
         # process test_corpus
         test_sentence_strings = general.Opener(test_corpus)
         test_sentences = general.Tokenizer(test_sentence_strings)
         general.Unker(test_sentences, LanguageModel.unigram_counts)
 
-        # insert 2 sentence tags for trigram and </s>
+        # insert our sentence tags
         for i in range(0, len(test_sentences)):
             test_sentences[i].insert(0, '<s>')
             test_sentences[i].insert(0, '<s>')
@@ -118,22 +118,19 @@ class LanguageModel:
                 if "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]) in LanguageModel.trigram_probs:
                     sen_prob += LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
                     prob_cum_sum += LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
-                    # print("In trigram probs: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
-                    trigrams += 1
-                # if we don't have that trigram, check for n-1, n bigram
+                    #trigrams += 1
+
+                # if we don't have that trigram, check for an n-1, n bigram
                 elif "{} {}".format(test_sentences[i][j-1], test_sentences[i][j]) in LanguageModel.bigram_probs:
                     sen_prob += math.log(0.4, 2) + LanguageModel.bigram_probs["{} {}".format(test_sentences[i][j-1], test_sentences[i][j])]
                     prob_cum_sum += math.log(0.4, 2) + LanguageModel.bigram_probs["{} {}".format(test_sentences[i][j-1], test_sentences[i][j])]
-                    # print("In bigram probs: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
-                    # print("    " + "{} {}".format(test_sentences[i][j-1], test_sentences[i][j]))
-                    bigrams += 1
-                # unseen trigram and bigram so just do unigram calc
+                    #bigrams += 1
+
+                # unseen trigram and bigram so we use our unigram probability
                 else:
                     sen_prob += math.log(0.16, 2) + LanguageModel.unigram_probs[test_sentences[i][j]]
                     prob_cum_sum += math.log(0.16, 2) + LanguageModel.unigram_probs[test_sentences[i][j]]
-                    # print("Sadge: " + "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]))
-                    # print("    " + test_sentences[i][j])
-                    unigrams += 1
+                    #unigrams += 1
             list_of_probs.append(sen_prob)
 
         sentences_and_probs = list(zip(test_sentence_strings, list_of_probs))
@@ -151,7 +148,6 @@ class LanguageModel:
         #print("Unigrams: " + str(unigrams))
         #print("Bigrams: " + str(bigrams))
         #print("Trigrams: " + str(trigrams))
-        #print("unseen </s>: " + str(unseen_end))
 
     def shannon(self, how_many):
         
@@ -172,7 +168,9 @@ class LanguageModel:
                 else:
                     shannon_probs[(nk[0], nk[1])].update( {k:probability})
 
+        # With our probabilites, generate random sentences using the Shannon Visualization method
         print("Shannon Visualization using trigram probabilites: ")
+        print("")
         for i in range(how_many):
             end_sentence = False
             last_bigram = ("<s>","<s>")
@@ -191,7 +189,7 @@ class LanguageModel:
                     last_bigram = (last_bigram[1],choice[0])
                     viz += f"{choice[0]} "
                     
-            print(viz)
+            print(f'{i +1}) {viz}')
                 
 
                 
