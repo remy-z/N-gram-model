@@ -12,16 +12,16 @@ Word n-1 (the previous word) is equal to the count of the (Word n-1 Word n) bigr
 chain rule of probability we can compute probabilities of entire sequences like P(W1, W2,..., Wn), and in turn the probability of an entire text.
 
 We can evaluate our model's effectiveness using a measure called Perplexity. Perplexity is the inverse probability of our test set, 
-normalized by the number of words in the set. Since the goal is having a model that predicts a test set as well as possible, a higher probabiliity 
+normalized by the number of words in the set. Since the goal is having a model that predicts a test set as well as possible, a higher probability 
 is better, and in turn a lower Perplexity means a better model. 
 
 To avoid issues that occur when a word we have not seen in our training set appears in the test set we implemented some smoothing methods. 
 First, Laplace smoothing accounts for out of vocabulary words by adding one to the count of every ngram. If we encounter an unseen ngram, we can 
 just pretend that we've seen it one time, so that we don't assign any ngrams a probability of zero. We also make use of the UNK method. When training 
-our ngram model, any word that occurs only one time is replaced by an <UNK> tag, then probabilites are calculated on the UNKed train set. When evaluating the model
+our ngram model, any word that occurs only one time is replaced by an <UNK> tag, then probabilities are calculated on the UNKed train set. When evaluating the model
 we preprocess the test set by replacing all out of vocabulary words (any word that didn't appear in the train set) with the <UNK> tag. 
 
-To avoid issues with underflow, all probabilites are calculated as log probabilites. 
+To avoid issues with underflow, all probabilities are calculated as log probabilities. 
 
 Finally, we've implemented a Shannon Visualization Model that allows us to visualize sentences that are randomly generated using our n gram models. 
 
@@ -29,16 +29,17 @@ The data we've used for this project is a compilation of sentences from the work
 
 This project is all in done all in python. 
 When run the program will output:
-	A list of all ngrams in the train set along side their probabilites 
-	A list of every all sentences in the test set with their probabilites 
+	A list of all ngrams in the train set along side their probabilities 
+	A list of every all sentences in the test set with their probabilities 
 	The perplexity of the model when evaluated on the given test set
 	Randomly generated sentences using Shannon Visualization 
 
-To run the model, pass it the following arguements 
+To run the model, pass it the following arguments 
 
 	filepath for train set, -t filepath for test set, -n order of n-gram, -s number of sentences to generate with Shannon Visualization
 
 Try these commands!
+
 
 	python main.py data/austen-train.txt -n 1 -t data/austen-dev.txt -s 10
 	python main.py data/austen-train.txt -n 2 -t data/austen-test.txt -s 10
