@@ -53,8 +53,8 @@ def main():
 
     elif args.ngram == 3:
         LanguageModel = TrigramModel
-    elif args.ngram == 4:
-        LanguageModel = LapTrigramModel
+    #elif args.ngram == 4:
+    #    LanguageModel = LapTrigramModel
 
     else:
         LanguageModel = UnigramModel
