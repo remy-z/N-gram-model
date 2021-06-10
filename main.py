@@ -5,6 +5,7 @@ from bigram import LanguageModel as BigramModel
 from trigram import LanguageModel as TrigramModel
 from unigram import LanguageModel as UnigramModel
 from trigram_laplace import LanguageModel as LapTrigramModel
+from trigram_interpolation import LanguageModel as InterpTrigramModel
 
 def main():
     # process the command line arguments
@@ -33,6 +34,8 @@ def main():
         LanguageModel = TrigramModel
     #elif args.ngram == 4:
     #    LanguageModel = LapTrigramModel
+    elif args.ngram == 5:
+        LanguageModel = InterpTrigramModel
 
     else:
         LanguageModel = UnigramModel
@@ -45,9 +48,22 @@ def main():
     print()
     
     # evaluates the language model
-    if args.test_corpus:
-        lm.score(args.test_corpus)   
+    #if args.test_corpus:    
+            #lm.score(args.test_corpus)   
     print()
+    HYPERPARAMETER = {}
+    for i in range(0,100,1):
+        lambda1 = i
+        for j in range (0, 100-lambda1, 1):
+            lambda2 = j
+            lambda3 = (100-j-i)
+            lambda1, lambda2, lambda3 = lambda1, lambda2/100, lambda3/100
+            perplexity = lm.score(args.test_corpus, lambda1/100, lambda2, lambda3)
+            HYPERPARAMETER.update({f"tri: {lambda1/100} bi: {lambda2} uni: {lambda3}": perplexity})
+            print(f"tri: {lambda1/100} bi: {lambda2} uni: {lambda3} | {perplexity}")
+
+    the_best = sorted(HYPERPARAMETER.items(), key = lambda x: (x[1]))
+    print(the_best)
 
     #Generate sentences with Shannon Visualization
     if args.shannon:
