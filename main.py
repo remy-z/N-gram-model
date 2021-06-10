@@ -7,28 +7,6 @@ from unigram import LanguageModel as UnigramModel
 from trigram_laplace import LanguageModel as LapTrigramModel
 
 def main():
-    '''
-    Interact with a LanguageModel() object via the command line.
-
-    When this script is called from the command line, this function will
-    instantiate a LanguageModel() object and store it as the variable `lm`.
-
-    It will then train the language model on the provided training corpus
-    by calling:
-
-        `lm.train()`
-
-    If a dev/test corpus is also provided, it will then evaluate the language
-    model on the provided corpus by calling:
-
-        `lm.score()
-
-    To read more about `argparse`, which handles interfacing with the command
-    line, check out the documentation:
-
-        https://docs.python.org/3/library/argparse.html
-
-    '''
     # process the command line arguments
     parser = ArgumentParser(description='Interact with a language model!')
 

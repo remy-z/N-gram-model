@@ -13,7 +13,7 @@ class LanguageModel:
     unigram_probs = {}
 
     def train(self, train_corpus):
-           
+        print("Calculating Unigram Probabilites...")   
         # Opens train_corpus and save it as a list of lists
         train_sentences = general.Tokenizer(general.Opener(train_corpus))
         
@@ -44,7 +44,6 @@ class LanguageModel:
 
 
     def score(self, test_corpus):    
-        
         # Open test_corpus and save as a list of sentences 
         test_sentence_strings = general.Opener(test_corpus) 
         # Turn sentences into list of lists

@@ -15,6 +15,7 @@ class LanguageModel:
     train_corpus =""
 
     def train(self, train_corpus):
+        print("Calculating Bigram Probabilites...")
         LanguageModel.train_corpus = train_corpus
         # Opens train_corpus and save it as a list of lists
         train_sentences = general.Tokenizer(general.Opener(train_corpus))
@@ -34,7 +35,7 @@ class LanguageModel:
         for k in LanguageModel.bigram_counts:
             for nk in LanguageModel.bigram_counts[k]:   
                 probability = math.log( ((LanguageModel.bigram_counts[k][nk] + 1) / (LanguageModel.unigram_counts[nk] + LanguageModel.vocab_size)), 2)
-                LanguageModel.bigram_probs.update({"{} {}".format(nk,k): probability})
+                LanguageModel.bigram_probs.update({f"{nk} {k}": probability})
         bigram_probs_sorted = dict(sorted(LanguageModel.bigram_probs.items(), key = lambda x: (-x[1], x[0])))
         
         output_this = ""
@@ -45,7 +46,6 @@ class LanguageModel:
 
 
     def score(self, test_corpus):
-        
         # open test_corpus and save as a list of sentences 
         test_sentence_strings = general.Opener(test_corpus) 
         # turn sentences into list of lists
@@ -62,22 +62,19 @@ class LanguageModel:
         prob_cum_sum = 0   # this is the sum of probabilities for every sentence
         word_count = 0     # this is our N for calculating perplexity
         list_of_probs = [] #keep track of -our probabilites 
-        seen = 0
-        unseen = 0
+
         for i in range(0, len(test_sentences)):
 
             sen_prob = 0
             # word_count += 1 #include <s> in our word count(N)?
             for j in range(1, len(test_sentences[i])):
                 word_count += 1
-                if "{} {}".format(test_sentences[i][j-1],test_sentences[i][j]) in LanguageModel.bigram_probs:  
-                    sen_prob += LanguageModel.bigram_probs["{} {}".format(test_sentences[i][j-1],test_sentences[i][j])]
-                    prob_cum_sum += LanguageModel.bigram_probs["{} {}".format(test_sentences[i][j-1],test_sentences[i][j])]
-                    seen += 1
+                if f"{test_sentences[i][j-1]} {test_sentences[i][j]}" in LanguageModel.bigram_probs:  
+                    sen_prob += LanguageModel.bigram_probs[f"{test_sentences[i][j-1]} {test_sentences[i][j]}"]
+                    prob_cum_sum += LanguageModel.bigram_probs[f"{test_sentences[i][j-1]} {test_sentences[i][j]}"]
                 else:
                     sen_prob += math.log( ((1) / (LanguageModel.unigram_counts[test_sentences[i][j-1]] + LanguageModel.vocab_size)), 2)
                     prob_cum_sum += math.log( ((1) / (LanguageModel.unigram_counts[test_sentences[i][j-1]] + LanguageModel.vocab_size)), 2)
-                    unseen += 1
             list_of_probs.append(sen_prob)    
 
 
@@ -96,8 +93,8 @@ class LanguageModel:
         print(output_this)
         print()
         print("Bigram Perplexity, Laplace Smoothing: " + str(perplexity))
-        print("unseen: " + str(unseen))
-        print("seen: " + str(seen))
+        #print("unseen: " + str(unseen))
+        #print("seen: " + str(seen))
         
     
     def shannon(self, how_many):

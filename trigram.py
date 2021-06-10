@@ -59,7 +59,6 @@ class LanguageModel:
             for nk in LanguageModel.bigram_counts[k]:
                 probability = math.log(((LanguageModel.bigram_counts[k][nk]) / (
                             LanguageModel.unigram_counts[nk])), 2)
-                # probability = round(probability, 3)
                 LanguageModel.bigram_probs.update({"{} {}".format(nk, k): probability})
         
         print("Calculating Trigram Probabilites...")
@@ -77,7 +76,7 @@ class LanguageModel:
         for k in LanguageModel.trigram_counts:
             for nk in LanguageModel.trigram_counts[k]:
                 probability = math.log( ((LanguageModel.trigram_counts[k][nk]) / (LanguageModel.bigram_counts[nk[1]][nk[0]])), 2)
-                LanguageModel.trigram_probs.update({"{} {} {}".format(nk[0], nk[1], k): probability})
+                LanguageModel.trigram_probs.update({f"{nk[0]} {nk[1]} {k}": probability})
         
         #sort and output the probabilites
         trigram_probs_sorted = dict(sorted(LanguageModel.trigram_probs.items(), key = lambda x: (-x[1], x[0])))
@@ -88,7 +87,6 @@ class LanguageModel:
         print(output_this)
 
     def score(self, test_corpus):
-
         # count type of ngram for sanity COPIUM
         # unigrams = 0
         # bigrams = 0
@@ -115,15 +113,15 @@ class LanguageModel:
                 word_count += 1
                 # stupid backoff implementation using unigram, bigram and trigram probabilities
                 # If we have n-2, n-1, n trigram use that probability
-                if "{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j]) in LanguageModel.trigram_probs:
-                    sen_prob += LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
-                    prob_cum_sum += LanguageModel.trigram_probs["{} {} {}".format(test_sentences[i][j-2], test_sentences[i][j-1], test_sentences[i][j])]
+                if f"{test_sentences[i][j-2]} {test_sentences[i][j-1]} {test_sentences[i][j]}" in LanguageModel.trigram_probs:
+                    sen_prob += LanguageModel.trigram_probs[f"{test_sentences[i][j-2]} {test_sentences[i][j-1]} {test_sentences[i][j]}"]
+                    prob_cum_sum += LanguageModel.trigram_probs[f"{test_sentences[i][j-2]} {test_sentences[i][j-1]} {test_sentences[i][j]}"]
                     #trigrams += 1
 
                 # if we don't have that trigram, check for an n-1, n bigram
-                elif "{} {}".format(test_sentences[i][j-1], test_sentences[i][j]) in LanguageModel.bigram_probs:
-                    sen_prob += math.log(0.4, 2) + LanguageModel.bigram_probs["{} {}".format(test_sentences[i][j-1], test_sentences[i][j])]
-                    prob_cum_sum += math.log(0.4, 2) + LanguageModel.bigram_probs["{} {}".format(test_sentences[i][j-1], test_sentences[i][j])]
+                elif f"{test_sentences[i][j-1]} {test_sentences[i][j]}" in LanguageModel.bigram_probs:
+                    sen_prob += math.log(0.4, 2) + LanguageModel.bigram_probs[f"{test_sentences[i][j-1]} {test_sentences[i][j]}"]
+                    prob_cum_sum += math.log(0.4, 2) + LanguageModel.bigram_probs[f"{test_sentences[i][j-1]} {test_sentences[i][j]}"]
                     #bigrams += 1
 
                 # unseen trigram and bigram so we use our unigram probability
