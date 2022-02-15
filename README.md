@@ -1,5 +1,5 @@
 # N-gram 
-N-gram model project for LING/CSE 472
+N-gram model project 
 By Remy Zachwieja & Mark Min
 
 This is an N-gram language model, after being training the model by determining probabilities of "ngrams" 
